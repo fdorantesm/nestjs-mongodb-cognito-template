@@ -1,0 +1,12 @@
+services:
+  mongodb:
+    container_name: ${COMPOSE_PROJECT_NAME}_mongodb
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=app
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    ports:
+      - 27128:27017
+    volumes:
+      - .mongodb:/data/db
