@@ -287,10 +287,16 @@ export class CognitoIdentityService implements IdentityService {
     const userAttributes: AttributeType[] = [];
 
     if (payload.displayName) {
-      userAttributes.push({
-        Name: 'name',
-        Value: payload.displayName,
-      });
+      userAttributes.push(
+        {
+          Name: 'name',
+          Value: payload.displayName,
+        },
+        {
+          Name: 'nickname',
+          Value: payload.displayName,
+        },
+      );
     }
 
     if (payload.phone) {

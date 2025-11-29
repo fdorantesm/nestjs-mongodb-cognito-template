@@ -1,6 +1,7 @@
 export * from './find-permissions.handler';
 export * from './find-role-permissions.handler';
 export * from './get-permission-by-id.handler';
+export * from './get-role-by-code.handler';
 export * from './get-role-by-id.handler';
 export * from './get-role-permission-by-id.handler';
 export * from './get-user-permissions.handler';
