@@ -1,3 +1,5 @@
 export function toUuid(buffer: Buffer) {
-  return buffer.toString('hex').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
+  return buffer
+    .toString('hex')
+    .replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
 }

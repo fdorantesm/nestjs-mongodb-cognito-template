@@ -1,5 +1,2 @@
-export class UserNotConfirmedException extends Error {
-  constructor(message?: string) {
-    super(message || 'User not confirmed');
-  }
-}
+// Re-export from auth module for backward compatibility
+export { UserNotConfirmedException } from '@/modules/auth/domain/exceptions/user-not-confirmed.exception';

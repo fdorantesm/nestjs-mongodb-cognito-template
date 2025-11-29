@@ -1,6 +1,7 @@
 // @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import hexagonalArchitecture from 'eslint-plugin-hexagonal-architecture';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -20,10 +21,48 @@ export default tseslint.config(
       ecmaVersion: 2021, // actualizado de 5 a 2021
       sourceType: 'module',
       parserOptions: {
-        project: './tsconfig.json', // agregado para vincular tsconfig.json
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    files: [
+      'src/modules/**/domain/**/*.ts',
+      'src/modules/**/application/**/*.ts',
+      'src/modules/**/infrastructure/**/*.ts',
+    ],
+    plugins: {
+      'hexagonal-architecture': hexagonalArchitecture,
+    },
+    rules: {
+      'hexagonal-architecture/enforce': [
+        'error',
+        {
+          layers: [
+            { name: 'domain', pattern: 'src/modules/**/domain/**' },
+            { name: 'application', pattern: 'src/modules/**/application/**' },
+            {
+              name: 'infrastructure',
+              pattern: 'src/modules/**/infrastructure/**',
+            },
+          ],
+          rules: [
+            {
+              from: 'domain',
+              allow: ['domain'],
+            },
+            {
+              from: 'application',
+              allow: ['domain', 'application'],
+            },
+            {
+              from: 'infrastructure',
+              allow: ['domain', 'application', 'infrastructure'],
+            },
+          ],
+        },
+      ],
     },
   },
   {

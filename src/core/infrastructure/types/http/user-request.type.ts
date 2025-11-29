@@ -1,7 +1,9 @@
 export type UserRequest = {
   user: {
     uuid: string;
+    identityId: string;
     email: string;
-    roles: string[];
+    role: string;
+    [key: string]: unknown;
   };
 };

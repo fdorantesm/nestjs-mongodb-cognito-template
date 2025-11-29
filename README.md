@@ -1,99 +1,392 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS MongoDB Cognito Template
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A production-ready NestJS template with MongoDB, AWS Cognito authentication, Hexagonal Architecture, and CQRS pattern. Perfect for building scalable APIs with clean architecture.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [Architecture Overview](#architecture-overview)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Development](#development)
+- [Testing](#testing)
+- [Adding Features](#adding-features)
+- [Debugging](#debugging)
+- [Key Concepts](#key-concepts)
+- [Documentation](#documentation)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture Overview
 
-## Project setup
+This project follows **Hexagonal Architecture** (Ports & Adapters) with **CQRS** pattern:
 
-```bash
-$ yarn install
+```
+domain/              # Pure business logic, entities, interfaces, commands/queries/events
+application/         # Handlers orchestrate flow, use cases delegate to services
+infrastructure/      # Adapters: http/controllers, database/repositories, services
 ```
 
-## Compile and run the project
+**Critical Rule**: Application layer NEVER imports from infrastructure layer. Use `@InjectService('ServiceName')` or `@InjectRepository('RepositoryName')` with interface types from domain.
 
-```bash
-# development
-$ yarn run start
+### Request Flow
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+```
+Controller → UseCase → CommandBus/QueryBus → Handler → Service → Repository
 ```
 
-## Run tests
+Controllers pass `Context` object and delegate to use cases. Use cases dispatch commands/queries. Handlers orchestrate business logic via services.
 
-```bash
-# unit tests
-$ yarn run test
+## Tech Stack
 
-# e2e tests
-$ yarn run test:e2e
+- **Framework**: NestJS 11
+- **Language**: TypeScript 5.9
+- **Database**: MongoDB with Mongoose
+- **Authentication**: AWS Cognito with JWT
+- **Architecture**: Hexagonal Architecture + CQRS
+- **Testing**: Jest
 
-# test coverage
-$ yarn run test:cov
+## Project Structure
+
+```
+src/
+├── modules/                 # Business modules
+│   ├── {module}/
+│   │   ├── domain/          # Entities, interfaces, commands, queries, events
+│   │   ├── application/     # Handlers, use cases
+│   │   └── infrastructure/  # Controllers, DTOs, repositories, services
+│   ├── auth/                # Authentication & authorization
+│   ├── identity/            # User identity management (Cognito)
+│   ├── settings/            # System settings
+│   └── users/               # User management
+├── config/                  # Configuration management
+├── core/                    # Shared utilities & base classes
+└── database/                # Database connection & configuration
+
+docs/                        # Detailed documentation
+scripts/                     # Seed scripts & utilities
+test/                        # E2E tests
 ```
 
-## Deployment
+## Getting Started
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Prerequisites
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- Node.js 18+
+- Yarn
+- Docker & Docker Compose
+- AWS Cognito account
+
+### Initial Setup
+
+1. **Clone and install dependencies**:
+
+   ```bash
+   git clone <repository-url>
+   cd nestjs-mongodb-cognito-template
+   yarn install
+   ```
+
+2. **Configure environment**:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start MongoDB**:
+
+   ```bash
+   docker-compose up -d mongodb
+   ```
+
+4. **Seed database** (in order):
+
+   ```bash
+   yarn seed:roles          # Create roles (required first)
+   yarn seed:users          # Create users
+   yarn seed:settings       # Create default settings
+   ```
+
+   Or seed all at once:
+
+   ```bash
+   yarn seed:all
+   ```
+
+5. **Register users in AWS Cognito**:
+   After seeding users, manually register them in AWS Cognito with password `OpenSesame!`
+
+6. **Start development server**:
+   ```bash
+   yarn start:dev           # Runs on http://localhost:3000
+   ```
+
+## Development
+
+### Available Commands
 
 ```bash
-$ yarn install -g mau
-$ mau deploy
+# Development
+yarn start:dev              # Watch mode
+yarn start:debug            # Debug mode
+yarn build                  # Build for production
+yarn start:prod             # Run production build
+
+# Seeds (all have :unseed and :reset variants)
+yarn seed:roles[:unseed|:reset]
+yarn seed:users[:unseed|:reset]
+yarn seed:settings
+yarn seed:all[:undo|:reset]
+
+# Code Quality
+yarn lint                   # Run ESLint with autofix
+yarn format                 # Run Prettier
+
+# Testing
+yarn test                   # Unit tests
+yarn test:watch             # Watch mode
+yarn test:cov               # With coverage
+yarn test:e2e               # End-to-end tests
+yarn test:debug             # Debug mode
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Testing
 
-## Resources
+### Unit Tests
 
-Check out a few resources that may come in handy when working with NestJS:
+Located in `*.spec.ts` files alongside source code:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+yarn test
+yarn test:watch              # Continuous testing
+yarn test:cov                # Generate coverage report
+```
 
-## Support
+### E2E Tests
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Located in `test/` directory:
 
-## Stay in touch
+```bash
+yarn test:e2e
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Adding Features
+
+### Step-by-Step Checklist
+
+Follow this process to add a new feature (e.g., DELETE endpoint):
+
+1. **Domain Layer** (`domain/`)
+
+   - Create command/query class: `domain/commands/delete-{entity}.command.ts`
+   - Add interface (optional): `domain/interfaces/{entity}-{service}.interface.ts`
+
+2. **Application Layer** (`application/`)
+
+   - Create handler: `application/commands/delete-{entity}.handler.ts`
+   - Create use case: `application/use-cases/delete-{entity}.use-case.ts`
+   - Register in barrel file: `application/commands/index.ts`, `application/use-cases/index.ts`
+
+3. **Infrastructure Layer** (`infrastructure/`)
+
+   - Add repository method (if needed): `database/repositories/{entity}.repository.ts`
+   - Add service method (if needed): `services/{entity}.service.ts`
+   - Add controller method: `http/controllers/{entity}.controller.ts`
+
+4. **Module Registration** (`{module}.module.ts`)
+
+   - Import handler in `CommandHandlers` array
+   - Import use case in module `providers`
+   - Inject use case in controller `constructor`
+
+5. **Testing & Validation**
+   - Compile: `yarn build`
+   - Test: `yarn test`
+   - Run dev server: `yarn start:dev`
+
+### Example: Adding DELETE Setting
+
+```bash
+# 1. Domain: Create command
+src/modules/settings/domain/commands/delete-setting.command.ts
+
+# 2. Application: Create handler and use case
+src/modules/settings/application/commands/delete-setting.handler.ts
+src/modules/settings/application/use-cases/delete-setting.use-case.ts
+
+# 3. Infrastructure: Add controller endpoint
+src/modules/settings/infrastructure/http/controllers/settings.controller.ts
+
+# 4. Module: Register handler and use case in settings.module.ts
+# 5. Compile and test
+yarn build && yarn start:dev
+```
+
+### Key Rules When Adding Features
+
+1. **Never import infrastructure into application** - Use `@InjectService` or `@InjectRepository` with domain interface types
+2. **Always use absolute imports** - `@/modules/...` instead of relative paths
+3. **Always use entity `create()` method** - Never `new Entity()`
+4. **One export per file** - Each class/interface/type in separate file
+5. **File naming matches export** - `delete-setting.command.ts` exports `DeleteSettingCommand`
+6. **Use ConfigService** - Never direct `process.env` access
+7. **Repository prefix** - Implementation classes use `Database` prefix
+8. **No `I` prefix on interfaces** - Use descriptive names
+9. **Layer boundaries** - Domain → Application → Infrastructure (never reverse)
+10. **Event handlers** - Multiple handlers can listen to same event (separate concerns)
+
+## Debugging
+
+### Finding Bugs
+
+1. **Check logs**: Development mode provides detailed error logging
+2. **Use debug mode**:
+
+   ```bash
+   yarn start:debug
+   ```
+
+   Then attach your debugger to `localhost:9229`
+
+3. **Check for common issues**:
+   - Layer boundary violations (app importing infrastructure)
+   - Missing dependency injection tokens
+   - Entity created without `create()` method
+   - Relative imports instead of absolute
+   - Missing `@Injectable()` decorator
+   - Circular dependencies
+
+### Debug Checklist
+
+When tracking down a bug:
+
+- [ ] Check error logs for stack trace
+- [ ] Verify layer boundaries are respected
+- [ ] Confirm all services/repositories are properly registered
+- [ ] Check entity creation uses static `create()` method
+- [ ] Verify all imports use absolute paths
+- [ ] Test with isolated unit tests
+- [ ] Check database indexes and queries
+- [ ] Verify JWT token is valid (for auth issues)
+- [ ] Check AWS Cognito configuration (for auth issues)
+
+### Common Error Patterns
+
+**"Cannot find module"**: Use absolute imports from `@/modules/...`
+
+**"Cannot inject X"**: Check module providers array includes service/repository
+
+**"Circular dependency"**: Refactor to use events or move shared logic to core
+
+**Entity validation errors**: Check static `create()` method validation logic
+
+## Key Concepts
+
+### Authorization
+
+Uses **permission-based authorization** (RBAC):
+
+```typescript
+@Get('/')
+@UseGuards(JwtAuthGuard, PermissionGuard)
+@RequirePermissions(['Settings:Read'])
+async getSettings() { ... }
+```
+
+Permissions follow pattern: `Resource:Action` (e.g., `Users:Create`, `Settings:Update`)
+
+Define new permissions in `scripts/utils/roles.map.ts`
+
+### Pagination
+
+List endpoints support pagination, filtering, and sorting through query parameters:
+
+```typescript
+// Controller
+@Get('/')
+public async list(
+  @Ctx() context: Context,
+  @QueryParserDecorator() query?: QueryParser,
+) {
+  return this.listUseCase.execute(
+    context,
+    query?.filter,
+    query?.options,
+  );
+}
+
+// Use Case
+public async execute(
+  context: Context,
+  filter?: Json,
+  options?: QueryParsedOptions,
+) {
+  const items = await this.queryBus.execute(
+    new ListQuery(filter, options),
+  );
+  return items.map(item => item.toJson());
+}
+```
+
+**Query Parameters:**
+
+- `filter[field]=value` - Filter by field
+- `page=1` - Page number (default: 1)
+- `limit=10` - Items per page (default: 10)
+- `sort=field` - Sort by field ascending
+- `sort=-field` - Sort by field descending
+
+**Example:**
+
+```bash
+GET /v1/users?filter[role]=admin&page=1&limit=20&sort=-createdAt
+```
+
+**Import Required:**
+
+```typescript
+import { QueryParser as QueryParserDecorator } from '@/core/infrastructure/decorators/query-parser.decorator';
+import type { QueryParser } from '@/core/types/general/query-parser.type';
+import type { Json } from '@/core/domain/json';
+import type { QueryParsedOptions } from '@/core/types/general/query-parsed-options.type';
+```
+
+## Documentation
+
+Detailed documentation in `docs/`:
+
+- `HEXAGONAL_ARCHITECTURE_VIOLATIONS.md` - Common mistakes and solutions
+- `AUDIT_FIELDS.md` - Tracking created/updated metadata
+- `SETTINGS_MODULE.md` - System configuration management
+- `ERRORS.md` - Error handling patterns
+- `TESTING.md` - Testing best practices
+
+## Configuration
+
+All configuration via environment variables. See `.env.example` for required values.
+
+Key configurations:
+
+- **Database**: MongoDB connection string
+- **Auth**: AWS Cognito credentials
+- **Security**: JWT configuration
+
+Access via `ConfigService`, never direct `process.env`.
+
+## Commit Convention
+
+Follow conventional commits in lowercase:
+
+```
+feat: add product creation endpoint
+fix: resolve user validation issue
+docs: update architecture documentation
+refactor: extract validation logic
+test: add user creation tests
+chore: update dependencies
+```
+
+Present tense, max 50 chars for subject line.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT

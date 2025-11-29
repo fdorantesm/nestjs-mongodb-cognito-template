@@ -16,6 +16,7 @@ export const QueryParser = createParamDecorator(
     const page = parsedQuery?.filter?.page && Number(parsedQuery.filter.page);
     parsedQuery.options.limit = parsedQuery.limit && Number(parsedQuery.limit);
     parsedQuery.options.sort = parsedQuery.sort;
+    parsedQuery.options.populate = parsedQuery.populate;
     parsedQuery.options.page = page;
 
     delete parsedQuery.filter.page;

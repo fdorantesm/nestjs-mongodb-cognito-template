@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, Length, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class RegistrationDto {
   @ApiProperty({ type: 'string' })
@@ -26,4 +32,12 @@ export class RegistrationDto {
   @ApiProperty({ example: 'My Display Name' })
   @IsString()
   public readonly displayName: string;
+
+  @ApiProperty({ example: '+525512345678', required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\+[1-9]\d{1,14}$/, {
+    message: 'Phone number must be in E.164 format (e.g., +525512345678)',
+  })
+  public readonly phone?: string;
 }

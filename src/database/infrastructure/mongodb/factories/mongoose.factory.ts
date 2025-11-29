@@ -1,6 +1,3 @@
-import { Environment } from '@/core/domain/enums/environment.enum';
-import { DatabaseConnection } from '@/core/infrastructure/types';
-import { MongooseConnectionFactory } from '@/database/infrastructure/mongodb/factories/mongoose-connection.factory';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -10,11 +7,19 @@ import {
 import { ConnectionString } from 'connection-string';
 import mongoose from 'mongoose';
 
+import { DatabaseConnection } from '@/core/infrastructure/types';
+import { MongooseConnectionFactory } from '@/database/infrastructure/mongodb/factories/mongoose-connection.factory';
+import type { EnvironmentConfig } from '@/core/infrastructure/types/environment/environment.type';
+import { RequestContextService } from '@/core/infrastructure/services/request-context.service';
+
 @Injectable()
 export class MongooseFactory implements MongooseOptionsFactory {
   protected config: DatabaseConnection;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly requestContextService: RequestContextService,
+  ) {
     this.config = configService.get<DatabaseConnection>('database');
   }
 
@@ -28,13 +33,18 @@ export class MongooseFactory implements MongooseOptionsFactory {
 
     const { createForInstance } = MongooseConnectionFactory;
 
-    const environemnt = this.configService.get<Environment>(
-      'environment.nodeEnv',
-    );
+    const { isDebug } =
+      this.configService.get<EnvironmentConfig>('environment');
 
-    if (environemnt === Environment.DEVELOPMENT) {
+    if (isDebug) {
       mongoose.set('debug', (collectionName, method, query) => {
-        Logger.log(JSON.stringify(query), `${collectionName}.${method}`);
+        const requestId = this.requestContextService.getRequestId();
+        const context = requestId || 'Mongoose';
+
+        Logger.debug(
+          `Query ${collectionName}.${method}(${JSON.stringify(query)})`,
+          context,
+        );
       });
     }
 

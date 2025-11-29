@@ -269,7 +269,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
     options: QueryParsedOptions,
   ): Promise<Pagination<E>> {
     const total = await this.store.count(filter as I);
-    const docs = await this.store
+    const items = await this.store
       .find(filter as I)
       .skip(options.offset)
       .limit(options.limit)
@@ -285,7 +285,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
 
     return {
       limit,
-      docs,
+      items,
       total,
       pages,
       page,

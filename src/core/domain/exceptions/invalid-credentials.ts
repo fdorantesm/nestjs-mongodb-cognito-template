@@ -1,5 +1,2 @@
-export class InvalidCredentialsException extends Error {
-  constructor(message?: string) {
-    super(message || 'Invalid credentials');
-  }
-}
+// Re-export from auth module for backward compatibility
+export { InvalidCredentialsException } from '@/modules/auth/domain/exceptions/invalid-credentials.exception';

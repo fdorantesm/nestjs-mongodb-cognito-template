@@ -1,3 +1,9 @@
 export interface RolePermissionsAggregate {
-  permissions: string[];
+  permissions:
+    | string[]
+    | Array<{
+        uuid: string;
+        name: string;
+        code: string;
+      }>;
 }

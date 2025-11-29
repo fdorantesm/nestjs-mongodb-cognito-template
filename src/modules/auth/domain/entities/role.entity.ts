@@ -10,6 +10,18 @@ export class RoleEntity extends BaseEntity<Role> {
     return new RoleEntity(role);
   }
 
+  public getName(): string {
+    return this._data.name;
+  }
+
+  public getCode(): string {
+    return this._data.code;
+  }
+
+  public setPermissions(permissions: Role['permissions']): void {
+    this._data.permissions = permissions;
+  }
+
   public toObject(): Role {
     return {
       ...this._data,

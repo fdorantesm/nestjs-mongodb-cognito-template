@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import {
+  Global,
+  MiddlewareConsumer,
+  Module,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -8,11 +13,14 @@ import { HttpExceptionFilter } from '@/core/infrastructure/filters/exception.fil
 import { TransformInterceptor } from '@/core/infrastructure/interceptors/transform.interceptor';
 import { LoggerMiddleware } from '@/core/infrastructure/middlewares/logger.middleware';
 import { ContextMiddleware } from '@/core/infrastructure/middlewares/context.middleware';
+import { RequestContextService } from '@/core/infrastructure/services/request-context.service';
 import { DatabaseModule } from '@/database/database.module';
 
+@Global()
 @Module({
   imports: [CqrsModule, ConfigModule.forRoot(configOptions), DatabaseModule],
   providers: [
+    RequestContextService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
@@ -26,6 +34,7 @@ import { DatabaseModule } from '@/database/database.module';
       useClass: LoggerMiddleware,
     },
   ],
+  exports: [RequestContextService],
 })
 export class CoreModule {
   public configure(consumer: MiddlewareConsumer) {

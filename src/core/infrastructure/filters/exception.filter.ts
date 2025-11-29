@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+import { BaseException } from '@/core/domain/exceptions/base.exception';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -21,10 +22,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.url;
     const data = exceptionResponse?.data;
+
+    // Extract error code if exception is BaseException
+    let errorCode: string | undefined;
+    if (exception instanceof BaseException) {
+      errorCode = exception.code;
+    }
+
     const baseData = {
       requestId: request.ctx.requestId,
       timestamp,
       path,
+      code: errorCode,
       data,
       cause: exception?.cause,
       errors: exceptionResponse?.errors,

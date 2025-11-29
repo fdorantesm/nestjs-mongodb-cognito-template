@@ -4,10 +4,8 @@ import {
   SchemaFactory,
   type ModelDefinition,
 } from '@nestjs/mongoose';
-import { SchemaTypes } from 'mongoose';
 
 import { BaseDocument } from '@/core/infrastructure/models/base-document';
-import { toUuid } from '@/utils/mongo-uuid';
 
 @Schema({
   collection: 'roles',
@@ -25,13 +23,23 @@ export class RoleDocument extends BaseDocument {
 
   @Prop({
     required: true,
-    type: [SchemaTypes.UUID],
-    get: (v: Buffer) => toUuid(v),
+    unique: true,
+    type: String,
+    index: true,
+    sparse: true,
   })
-  public permissions: string[];
+  public code: string;
 }
 
 export const RoleSchema = SchemaFactory.createForClass(RoleDocument);
+
+// Virtual field for permissions
+RoleSchema.virtual('permissions', {
+  ref: 'RolePermissionDocument',
+  localField: 'uuid',
+  foreignField: 'roleId',
+  justOne: false,
+});
 
 export const RoleModel: ModelDefinition = {
   name: RoleDocument.name,

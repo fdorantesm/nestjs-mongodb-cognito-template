@@ -1,7 +1,7 @@
 import { Filter } from '@/core/domain/interfaces/filter.interface';
 import { Json } from '@/core/infrastructure/types';
 import { QueryParsedOptions } from '@/core/types/general/query-parsed-options.type';
-import { Pagination } from './pagination';
+import type { Pagination } from '@/core/domain/pagination';
 
 export interface Crud<I, E> {
   create(role: I): Promise<E>;

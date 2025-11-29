@@ -28,6 +28,12 @@ export class PermissionDocument extends BaseDocument {
     index: true,
   })
   public code: string;
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  public description?: string;
 }
 
 export const PermissionSchema =
