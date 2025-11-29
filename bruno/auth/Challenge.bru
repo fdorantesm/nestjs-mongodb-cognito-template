@@ -1,0 +1,29 @@
+meta {
+  name: Challenge
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/auth/challenge
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "user@example.com",
+    "challengeName": "EMAIL_OTP",
+    "session": "session-token-from-login",
+    "value": "123456"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.accessToken) {
+    bru.setEnvVar("accessToken", res.body.accessToken);
+  }
+  if (res.status === 200 && res.body.refreshToken) {
+    bru.setEnvVar("refreshToken", res.body.refreshToken);
+  }
+}

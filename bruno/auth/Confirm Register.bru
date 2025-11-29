@@ -1,0 +1,18 @@
+meta {
+  name: Confirm Register
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/confirm-register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "user@example.com",
+    "confirmationCode": "123456"
+  }
+}

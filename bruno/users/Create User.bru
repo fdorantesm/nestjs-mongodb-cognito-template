@@ -1,0 +1,33 @@
+meta {
+  name: Create User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "email": "newuser@example.com",
+    "password": "MyPassword123*",
+    "username": "newusername",
+    "roleId": "00000000-0000-0000-0000-000000000000",
+    "scopes": [],
+    "profile": {
+      "displayName": "New User",
+      "avatarUrl": "",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "phone": ""
+    }
+  }
+}

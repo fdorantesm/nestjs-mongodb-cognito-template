@@ -1,0 +1,28 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/v1/users/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "username": "updatedusername",
+    "profile": {
+      "displayName": "Updated Display Name"
+    }
+  }
+}
