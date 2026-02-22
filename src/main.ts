@@ -1,23 +1,13 @@
-import {
-  BadRequestException,
-  ConsoleLogger,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
+import { ConsoleLogger, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import helmet from 'helmet';
 
+import { setupSecurity } from '@/bootstrap/setup-security';
+import { setupSwagger } from '@/bootstrap/setup-swagger';
+import { setupValidation } from '@/bootstrap/setup-validation';
 import { HttpServerConfiguration } from '@/core/infrastructure/types';
 import { MainModule } from '@/main.module';
-import { PaginatedResponseDto } from '@/core/infrastructure/http/dtos';
-import { UserResponseDto } from '@/modules/users/infrastructure/http/dtos';
-import {
-  RoleResponseDto,
-  PermissionResponseDto,
-} from '@/modules/auth/infrastructure/http/dtos';
 
 async function bootstrap() {
   const logger = new ConsoleLogger({
@@ -38,73 +28,13 @@ async function bootstrap() {
 
   const { host, port } = config;
 
-  app.set('trust proxy', 1);
+  setupSecurity(app);
 
   app.enableVersioning();
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      exceptionFactory: (errors) => {
-        const fields = errors.map((error) => error.property);
-        const errorMessages = errors.reduce<string[]>((acc, error) => {
-          return acc.concat(Object.values(error.constraints || {}));
-        }, []);
+  setupValidation(app);
 
-        return new BadRequestException({
-          errors: errorMessages,
-          message: `Validation failed for fields: ${fields.join(' ')}`,
-        });
-      },
-    }),
-  );
-
-  app.use(helmet());
-
-  const documentBuilder = new DocumentBuilder()
-    .setTitle('API Docs')
-    .setDescription('API Reference')
-    .addBearerAuth()
-    .addApiKey({
-      type: 'apiKey',
-      name: 'Authorization',
-      in: 'header',
-      bearerFormat: 'ApiKey',
-    })
-    .build();
-
-  const document = SwaggerModule.createDocument(app, documentBuilder, {
-    extraModels: [
-      PaginatedResponseDto,
-      UserResponseDto,
-      RoleResponseDto,
-      PermissionResponseDto,
-    ],
-  });
-
-  SwaggerModule.setup('docs', app, document, {
-    swaggerOptions: {
-      requestInterceptor: (req) => {
-        const authHeaderKey = Object.keys(req.headers).find(
-          (key) => key.toLowerCase() === 'authorization',
-        );
-        if (authHeaderKey) {
-          const authHeader = req.headers[authHeaderKey];
-          if (typeof authHeader === 'string') {
-            if (authHeader.startsWith('Bearer ')) {
-              return req;
-            }
-            if (!authHeader.startsWith('ApiKey ')) {
-              req.headers[authHeaderKey] = `ApiKey ${authHeader}`;
-            }
-          }
-        }
-        return req;
-      },
-    },
-  });
+  setupSwagger(app);
 
   app.listen(port || 3000, () => {
     Logger.log(`Server ready on http://${host}:${port}`, 'Application');
