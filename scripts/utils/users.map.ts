@@ -31,7 +31,7 @@ export const defaultUserSeeds: UserSeedDefinition[] = [
     password: 'OpenSesame1!',
     username: 'root',
     displayName: 'Root Superuser',
-    roleName: 'super-admin',
+    roleName: 'root',
     scopes: [Scopes.Website],
     profile: {
       displayName: 'Root Superuser',

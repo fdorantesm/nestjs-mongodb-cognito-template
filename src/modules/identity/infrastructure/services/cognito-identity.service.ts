@@ -6,6 +6,7 @@ import {
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
   AdminUpdateUserAttributesCommand,
+  AssociateSoftwareTokenCommand,
   AttributeType,
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
@@ -13,6 +14,7 @@ import {
   InitiateAuthCommand,
   RespondToAuthChallengeCommand,
   SignUpCommand,
+  VerifySoftwareTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
@@ -39,6 +41,11 @@ export class CognitoIdentityService implements IdentityService {
 
   constructor(private readonly configService: ConfigService) {
     this.config = this.configService.get('cognito');
+
+    if (!this.config?.region) {
+      throw new Error('Cognito configuration is missing region');
+    }
+
     this.client = new CognitoIdentityProviderClient({
       region: this.config.region,
     });
@@ -201,14 +208,29 @@ export class CognitoIdentityService implements IdentityService {
             username,
           };
         case 'EMAIL_OTP':
+        case 'SOFTWARE_TOKEN_MFA':
+        case 'SMS_MFA':
+        case 'MFA_SETUP':
           return {
             challengeName: response.ChallengeName,
             session: response.Session,
           };
+        case undefined:
+        case null:
+          if (response.AuthenticationResult) {
+            return {
+              accessToken: response.AuthenticationResult.AccessToken,
+              refreshToken: response.AuthenticationResult.RefreshToken,
+            };
+          }
+
+          throw new InvalidCredentialsException(
+            'Authentication failed: no result received from Cognito',
+          );
         default:
           return {
-            accessToken: response.AuthenticationResult.AccessToken,
-            refreshToken: response.AuthenticationResult.RefreshToken,
+            challengeName: response.ChallengeName,
+            session: response.Session,
           };
       }
     } catch (error) {
@@ -242,6 +264,13 @@ export class CognitoIdentityService implements IdentityService {
             }),
           );
 
+          if (response.AuthenticationResult) {
+            return {
+              accessToken: response.AuthenticationResult.AccessToken,
+              refreshToken: response.AuthenticationResult.RefreshToken,
+            };
+          }
+
           return {
             challengeName: response.ChallengeName,
             session: response.Session,
@@ -266,6 +295,96 @@ export class CognitoIdentityService implements IdentityService {
             refreshToken: response.AuthenticationResult.RefreshToken,
           };
         }
+        case 'MFA_SETUP': {
+          const verifyResponse = await this.verifySoftwareToken(
+            payload.session,
+            payload.value,
+            'Authenticator App',
+          );
+
+          if (verifyResponse.status === 'SUCCESS' && verifyResponse.session) {
+            const secretHash = await this.getSecretHash(payload.username);
+            const authResponse = await this.client.send(
+              new RespondToAuthChallengeCommand({
+                ChallengeName: 'MFA_SETUP',
+                ClientId: this.config.clientId,
+                ChallengeResponses: {
+                  USERNAME: payload.username,
+                  SECRET_HASH: secretHash,
+                },
+                Session: verifyResponse.session,
+              }),
+            );
+
+            if (authResponse.AuthenticationResult) {
+              return {
+                accessToken: authResponse.AuthenticationResult.AccessToken,
+                refreshToken: authResponse.AuthenticationResult.RefreshToken,
+              };
+            }
+
+            return {
+              challengeName: authResponse.ChallengeName,
+              session: authResponse.Session,
+            };
+          }
+
+          throw new InvalidCredentialsException('MFA verification failed');
+        }
+        case 'SOFTWARE_TOKEN_MFA': {
+          const secretHash = await this.getSecretHash(payload.username);
+          const response = await this.client.send(
+            new RespondToAuthChallengeCommand({
+              ChallengeName: payload.challengeName,
+              ClientId: this.config.clientId,
+              ChallengeResponses: {
+                USERNAME: payload.username,
+                SECRET_HASH: secretHash,
+                SOFTWARE_TOKEN_MFA_CODE: payload.value,
+              },
+              Session: payload.session,
+            }),
+          );
+
+          if (response.AuthenticationResult) {
+            return {
+              accessToken: response.AuthenticationResult.AccessToken,
+              refreshToken: response.AuthenticationResult.RefreshToken,
+            };
+          }
+
+          return {
+            challengeName: response.ChallengeName,
+            session: response.Session,
+          };
+        }
+        case 'SMS_MFA': {
+          const secretHash = await this.getSecretHash(payload.username);
+          const response = await this.client.send(
+            new RespondToAuthChallengeCommand({
+              ChallengeName: payload.challengeName,
+              ClientId: this.config.clientId,
+              ChallengeResponses: {
+                USERNAME: payload.username,
+                SECRET_HASH: secretHash,
+                SMS_MFA_CODE: payload.value,
+              },
+              Session: payload.session,
+            }),
+          );
+
+          if (response.AuthenticationResult) {
+            return {
+              accessToken: response.AuthenticationResult.AccessToken,
+              refreshToken: response.AuthenticationResult.RefreshToken,
+            };
+          }
+
+          return {
+            challengeName: response.ChallengeName,
+            session: response.Session,
+          };
+        }
         default: {
           throw new Error('Challenge not supported');
         }
@@ -276,6 +395,9 @@ export class CognitoIdentityService implements IdentityService {
           throw new UserNotConfirmedException();
         case 'NotAuthorizedException':
         case 'UserNotFoundException':
+        case 'CodeMismatchException':
+        case 'ExpiredCodeException':
+        case 'InvalidParameterException':
           throw new InvalidCredentialsException();
         default:
           throw error;
@@ -434,6 +556,71 @@ export class CognitoIdentityService implements IdentityService {
       switch (error.name) {
         case 'NotAuthorizedException':
           throw new InvalidCredentialsException('Invalid access token');
+        default:
+          throw error;
+      }
+    }
+  }
+
+  public async associateSoftwareToken(session: string): Promise<any> {
+    try {
+      const response = await this.client.send(
+        new AssociateSoftwareTokenCommand({
+          Session: session,
+        }),
+      );
+
+      return {
+        secretCode: response.SecretCode,
+        session: response.Session,
+      };
+    } catch (error) {
+      switch (error.name) {
+        case 'NotAuthorizedException':
+          throw new InvalidCredentialsException('Invalid session or token');
+        case 'InvalidParameterException':
+          throw new InvalidCredentialsException('Invalid session');
+        default:
+          throw error;
+      }
+    }
+  }
+
+  public async verifySoftwareToken(
+    session: string,
+    userCode: string,
+    friendlyDeviceName?: string,
+  ): Promise<any> {
+    try {
+      const response = await this.client.send(
+        new VerifySoftwareTokenCommand({
+          Session: session,
+          UserCode: userCode,
+          FriendlyDeviceName: friendlyDeviceName,
+        }),
+      );
+
+      return {
+        status: response.Status,
+        session: response.Session,
+      };
+    } catch (error) {
+      switch (error.name) {
+        case 'CodeMismatchException':
+          throw new InvalidCredentialsException('Invalid verification code');
+        case 'EnableSoftwareTokenMFAException':
+          if (
+            error.message &&
+            String(error.message).toLowerCase().includes('code mismatch')
+          ) {
+            throw new InvalidCredentialsException('Invalid verification code');
+          }
+
+          throw new Error(
+            'Software token MFA is not enabled for this user pool',
+          );
+        case 'NotAuthorizedException':
+          throw new InvalidCredentialsException('Invalid session or token');
         default:
           throw error;
       }

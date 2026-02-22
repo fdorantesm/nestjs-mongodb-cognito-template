@@ -28,4 +28,5 @@ export interface IdentityService {
     expiresIn: number;
   }>;
   logout(accessToken: string): Promise<void>;
+  associateSoftwareToken(session: string): Promise<any>;
 }

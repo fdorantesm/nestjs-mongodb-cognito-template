@@ -5,6 +5,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { cognitoLoader } from '@/modules/auth/infrastructure/config/cognito.loader';
 import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/identity.service.interface';
 import { CognitoIdentityService } from '@/modules/identity/infrastructure/services/cognito-identity.service';
+import { AssociateSoftwareTokenHandler } from '@/modules/identity/application/commands/associate-software-token.handler';
 import { ConfirmRegisterHandler } from '@/modules/identity/application/commands/confirm-register.handler';
 import { CreateIdentityUserHandler } from '@/modules/identity/application/commands/create-identity-user.handler';
 import { DeleteIdentityUserHandler } from '@/modules/identity/application/commands/delete-identity-user.handler';
@@ -25,6 +26,7 @@ const identityProviders = [
 ];
 
 const commandHandlers = [
+  AssociateSoftwareTokenHandler,
   ConfirmRegisterHandler,
   CreateIdentityUserHandler,
   DeleteIdentityUserHandler,

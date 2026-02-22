@@ -31,7 +31,7 @@ export const defaultPermissions: PermissionSeed[] = [
     description: 'Get own user profile information',
   },
 
-  // User permissions - Self (own profile)
+  // User permissions - Self
   {
     name: 'Get Own Profile',
     code: 'Users:Get:Self',
@@ -41,6 +41,11 @@ export const defaultPermissions: PermissionSeed[] = [
     name: 'Update Own Profile',
     code: 'Users:Update:Self',
     description: 'Update own user profile',
+  },
+  {
+    name: 'Update Own Profile Extended',
+    code: 'Profile:Update:Self',
+    description: 'Update own extended profile information',
   },
 
   // User permissions - Admin level
@@ -81,13 +86,21 @@ export const defaultPermissions: PermissionSeed[] = [
     code: 'Roles:Get:*',
     description: 'Read role details by UUID',
   },
-  { name: 'Create Role', code: 'Roles:Create', description: 'Create new role' },
+  {
+    name: 'Create Role',
+    code: 'Roles:Create',
+    description: 'Create new role',
+  },
   {
     name: 'Update Role',
     code: 'Roles:Update:*',
     description: 'Update role details',
   },
-  { name: 'Delete Role', code: 'Roles:Delete:*', description: 'Delete role' },
+  {
+    name: 'Delete Role',
+    code: 'Roles:Delete:*',
+    description: 'Delete role',
+  },
 
   // Permission permissions
   {
@@ -133,7 +146,7 @@ export const defaultPermissions: PermissionSeed[] = [
     description: 'List all role-permission associations',
   },
 
-  // Settings permissions
+  // Configuration permissions
   {
     name: 'Read Settings',
     code: 'Settings:Read',
@@ -158,6 +171,7 @@ const basicUserPermissions = [
   'Auth:GetMe',
   'Users:Get:Self',
   'Users:Update:Self',
+  'Profile:Update:Self',
 ];
 
 const adminUserPermissions = [
@@ -187,12 +201,12 @@ const permissionManagementPermissions = [
   'RolePermissions:List',
 ];
 
-const settingsPermissions = ['Settings:Read', 'Settings:Update'];
+const settingsPermissions = ['Settings:Read', 'Settings:Update', 'Settings:Delete'];
 
 export const defaultRoles: RoleDefinition[] = [
   {
-    name: 'Super Admin',
-    code: 'super-admin',
+    name: 'Root',
+    code: 'root',
     permissionCodes: [
       ...basicUserPermissions,
       ...adminUserPermissions,
