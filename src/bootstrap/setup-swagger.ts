@@ -5,8 +5,8 @@ import { PaginatedResponseDto } from '@/core/infrastructure/http/dtos';
 import {
   PermissionResponseDto,
   RoleResponseDto,
-} from '@/modules/auth/infrastructure/http/dtos';
-import { UserResponseDto } from '@/modules/users/infrastructure/http/dtos';
+} from '@/modules/auth/presentation/http/dtos';
+import { UserResponseDto } from '@/modules/users/presentation/http/dtos';
 
 type SwaggerRequest = {
   headers: Record<string, unknown>;
