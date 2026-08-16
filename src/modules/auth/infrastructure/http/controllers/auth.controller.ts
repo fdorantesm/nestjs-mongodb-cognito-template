@@ -9,6 +9,7 @@ import {
   InternalServerErrorException,
   ConflictException,
   VERSION_NEUTRAL,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -129,6 +130,11 @@ export class AuthController {
           throw new UnauthorizedException(new InvalidCredentialsException());
         }
         default: {
+          Logger.error(
+            `Login error: ${error.name} - ${error.message}`,
+            error.stack,
+            ctx.requestId,
+          );
           throw new InternalServerErrorException();
         }
       }
