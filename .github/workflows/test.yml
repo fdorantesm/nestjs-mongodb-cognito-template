@@ -1,0 +1,76 @@
+name: tests
+
+on:
+  push:
+    branches: [main, 'feat/**', 'fix/**', 'chore/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run ESLint
+        run: yarn lint
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build project
+        run: yarn build
+
+  unit-tests:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run unit tests
+        run: yarn test --ci --runInBand
+
+  e2e-tests:
+    name: e2e-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run e2e tests
+        run: yarn test:e2e --runInBand --forceExit
+
+  all-checks-passed:
+    name: all-checks-passed
+    needs: [lint, build, unit-tests, e2e-tests]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify aggregate status
+        run: |
+          if [ "${{ needs.lint.result }}"        != "success" ] ||
+             [ "${{ needs.build.result }}"       != "success" ] ||
+             [ "${{ needs.unit-tests.result }}"  != "success" ] ||
+             [ "${{ needs.e2e-tests.result }}"   != "success" ]; then
+            echo "one or more jobs failed"
+            exit 1
+          fi
+          echo "all jobs passed"

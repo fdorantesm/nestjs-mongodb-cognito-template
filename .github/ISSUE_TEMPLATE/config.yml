@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/fdorantesm/nestjs-mongodb-cognito-template/tree/main/docs
+    about: Project docs (hexarch, errors, settings, etc.)
+  - name: OpenSpec proposals
+    url: https://github.com/fdorantesm/nestjs-mongodb-cognito-template/tree/main/openspec
+    about: Architectural changes are tracked as OpenSpec proposals.

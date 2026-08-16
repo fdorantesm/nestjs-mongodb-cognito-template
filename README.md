@@ -224,7 +224,7 @@ src/modules/settings/domain/commands/delete-setting.command.ts
 src/modules/settings/application/commands/delete-setting.handler.ts
 src/modules/settings/application/use-cases/delete-setting.use-case.ts
 
-# 3. Presentation: Add controller endpoint
+conventional commit# 3. Presentation: Add controller endpoint
 src/modules/settings/presentation/http/controllers/settings.controller.ts
 
 # 4. Module: Register handler and use case in settings.module.ts
