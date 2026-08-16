@@ -43,7 +43,6 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('User has no role assigned');
     }
 
-    // Get all permissions for the user's role
     const rolePermissions = await this.queryBus.execute<RolePermissionEntity[]>(
       new FindRolePermissionsQuery({
         roleId: user.roleId as string,
@@ -54,7 +53,6 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('User role has no permissions assigned');
     }
 
-    // Get the actual permission entities
     const permissionIds = rolePermissions.map((rp) => rp.getPermissionId());
     const userPermissions = await this.queryBus.execute<PermissionEntity[]>(
       new FindPermissionsQuery({
@@ -64,7 +62,6 @@ export class PermissionGuard implements CanActivate {
 
     const userPermissionCodes = userPermissions.map((p) => p.getCode());
 
-    // Check each required permission
     for (const requiredPermission of requiredPermissions) {
       if (
         !this.hasPermission(
@@ -101,38 +98,31 @@ export class PermissionGuard implements CanActivate {
   ): boolean {
     const [service, action, resource] = requiredPermission.split(':');
 
-    // If no resource specified, exact match required
     if (!resource) {
       return userPermissions.includes(requiredPermission);
     }
 
-    // Check for exact match first
     if (userPermissions.includes(requiredPermission)) {
       return true;
     }
 
-    // Check for wildcard permission (Service:Action:*)
     const wildcardPermission = `${service}:${action}:*`;
     if (userPermissions.includes(wildcardPermission)) {
       return true;
     }
 
-    // Handle "Self" resource - requires resourceId in request params or body
     if (resource === 'Self') {
       const resourceId = this.extractResourceId(request);
 
-      // If user has Self permission and resourceId matches user's UUID, allow
       if (resourceId && resourceId === user.uuid) {
         return true;
       }
 
-      // Also check if user has wildcard for this action
       if (userPermissions.includes(wildcardPermission)) {
         return true;
       }
     }
 
-    // For specific resource IDs, check if request targets that specific resource
     const resourceId = this.extractResourceId(request);
     if (resourceId && resourceId === resource) {
       return true;
@@ -141,24 +131,42 @@ export class PermissionGuard implements CanActivate {
     return false;
   }
 
-  /**
-   * Extract resource ID from request params, query, or body
-   * Checks common patterns: uuid, id, userId, roleId, appointmentId, etc.
-   */
   private extractResourceId(request: Request): string | null {
-    // Check params first (most common for RESTful routes)
-    if (request.params?.uuid) return request.params.uuid;
-    if (request.params?.id) return request.params.id;
+    if (request.params?.uuid) {
+      return this.toStringId(request.params.uuid);
+    }
 
-    // Check query parameters
-    if (request.query?.uuid) return request.query.uuid as string;
-    if (request.query?.id) return request.query.id as string;
+    if (request.params?.id) {
+      return this.toStringId(request.params.id);
+    }
 
-    // Check body
-    if (request.body?.uuid) return request.body.uuid;
-    if (request.body?.id) return request.body.id;
-    if (request.body?.userId) return request.body.userId;
+    if (request.query?.uuid) {
+      return request.query.uuid as string;
+    }
+
+    if (request.query?.id) {
+      return request.query.id as string;
+    }
+
+    if (request.body?.uuid) {
+      return request.body.uuid;
+    }
+
+    if (request.body?.id) {
+      return request.body.id;
+    }
+
+    if (request.body?.userId) {
+      return request.body.userId;
+    }
 
     return null;
+  }
+
+  private toStringId(value: string | string[]): string {
+    if (Array.isArray(value)) {
+      return String(value[0] ?? '');
+    }
+    return String(value);
   }
 }

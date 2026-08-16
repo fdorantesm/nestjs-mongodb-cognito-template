@@ -24,7 +24,7 @@ import { UserExtrasRepository } from '@/modules/users/infrastructure/database/re
 import { UsersService } from '@/modules/users/infrastructure/services/users.service';
 import { ProfilesService } from '@/modules/users/infrastructure/services/profiles.service';
 import { UserExtrasService } from '@/modules/users/infrastructure/services/users-extra.service';
-import { UsersController } from '@/modules/users/infrastructure/http/controllers/users.controller';
+import { UsersController } from '@/modules/users/presentation/http/controllers/users.controller';
 import { CreateUserHandler } from '@/modules/users/application/commands/create-user.handler';
 import { CreateUserExtraHandler } from '@/modules/users/application/commands/create-user-extra.handler';
 import { ConfirmUserHandler } from '@/modules/users/application/commands/confirm-user.handler';

@@ -3,10 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UuidModule } from 'nestjs-uuid';
 
-import { AuthController } from '@/modules/auth/infrastructure/http/controllers/auth.controller';
-import { PermissionsController } from '@/modules/auth/infrastructure/http/controllers/permissions.controller';
-import { RolePermissionsController } from '@/modules/auth/infrastructure/http/controllers/role-permissions.controller';
-import { RolesController } from '@/modules/auth/infrastructure/http/controllers/roles.controller';
+import { AuthController } from '@/modules/auth/presentation/http/controllers/auth.controller';
+import { PermissionsController } from '@/modules/auth/presentation/http/controllers/permissions.controller';
+import { RolePermissionsController } from '@/modules/auth/presentation/http/controllers/role-permissions.controller';
+import { RolesController } from '@/modules/auth/presentation/http/controllers/roles.controller';
 import { RoleModel } from '@/modules/auth/infrastructure/database/models/roles.model';
 import { RolesRepository } from '@/modules/auth/infrastructure/database/repositories/roles.repository';
 import { RolesService } from '@/modules/auth/infrastructure/services/roles.service';

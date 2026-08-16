@@ -10,6 +10,36 @@
 - The project uses CQRS pattern with commands and queries for business logic.
 - The codebase is modular, with each module encapsulating its own domain logic, application services, and infrastructure.
 
+### Module Structure
+
+Each module under `src/modules/<module>/` follows this layout:
+
+```
+src/modules/<module>/
+├── domain/           # Entities, value objects, interfaces, enums, exceptions, commands, queries, events (pure business kernel)
+├── application/      # Use cases, command/query/event handlers, application services (orchestrate the flow)
+├── infrastructure/   # Adapters: services (impl of domain interfaces), repositories, database/models, config loaders, guards, decorators
+└── presentation/     # HTTP layer: controllers, DTOs, request/response mappers
+    └── http/
+        ├── controllers/
+        └── dtos/
+```
+
+**Layer responsibilities:**
+
+- **`domain/`** — pure TypeScript, no framework dependencies. Defines ports (interfaces).
+- **`application/`** — orchestrates use cases using domain ports and infrastructure adapters. No NestJS decorators for controllers.
+- **`infrastructure/`** — provides adapters that implement the domain ports. Includes:
+  - `services/` — concrete service implementations.
+  - `database/models/` — Mongoose schemas.
+  - `database/repositories/` — repository implementations.
+  - `config/` — config loaders (Joi schemas, env parsing).
+  - `guards/` — NestJS guards (auth, permissions).
+  - `decorators/` — NestJS custom decorators.
+- **`presentation/`** — exposes the use cases through an HTTP interface. Includes:
+  - `http/controllers/` — NestJS controllers (routing + DTO binding).
+  - `http/dtos/` — request/response payloads, validation rules.
+
 ## Style Guide
 
 - Use clear and concise language.
@@ -52,7 +82,7 @@
 - Handlers must use `@InjectService` decorator to inject services via their domain interfaces.
 - Services must use `@InjectRepository` decorator to inject repositories.
 - Never inject repositories directly into handlers; always go through services.
-- infrastructure/http/{controllers,dtos} must only handle request/response and delegate all business logic to use cases.
+- presentation/http/{controllers,dtos} must only handle request/response and delegate all business logic to use cases.
 - Use cases just orchestrate the flow and delegate to services for business logic and return results to controllers.
 - **Services always return JSON (plain objects), not entities. Services must call `entity.toJson()` before returning.**
 - Use cases receive JSON from services and return JSON to controllers.

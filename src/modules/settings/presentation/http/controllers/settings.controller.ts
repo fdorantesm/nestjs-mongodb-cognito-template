@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { UpdateSettingDto } from '@/modules/settings/infrastructure/http/dtos';
+import { UpdateSettingDto } from '@/modules/settings/presentation/http/dtos';
 import { SettingKey } from '@/modules/settings/domain/enums';
 import { Ctx } from '@/core/infrastructure/decorators/context.decorator';
 import type { Context } from '@/core/domain/interfaces/context.interface';

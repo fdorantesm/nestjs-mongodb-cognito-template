@@ -16,9 +16,9 @@ import { ProtectedEndpoint } from '@/core/infrastructure/decorators/protected-en
 import { QueryParser as QueryParserDecorator } from '@/core/infrastructure/decorators/query-parser.decorator';
 import type { QueryParser } from '@/core/types/general/query-parser.type';
 import { ListQueryDto } from '@/core/infrastructure/http/dtos';
-import { CreateUserDto } from '@/modules/users/infrastructure/http/dtos/create-user.dto';
-import { UpdateUserDto } from '@/modules/users/infrastructure/http/dtos/update-user.dto';
-import { UserResponseDto } from '@/modules/users/infrastructure/http/dtos';
+import { CreateUserDto } from '@/modules/users/presentation/http/dtos/create-user.dto';
+import { UpdateUserDto } from '@/modules/users/presentation/http/dtos/update-user.dto';
+import { UserResponseDto } from '@/modules/users/presentation/http/dtos';
 import { ListUsersUseCase } from '@/modules/users/application/use-cases/list-users.use-case';
 import { GetUserByIdUseCase } from '@/modules/users/application/use-cases/get-user-by-id.use-case';
 import { CreateUserUseCase } from '@/modules/users/application/use-cases/create-user.use-case';

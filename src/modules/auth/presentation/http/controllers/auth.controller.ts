@@ -19,9 +19,9 @@ import { Endpoint } from '@/core/infrastructure/decorators/api-endpoint.decorato
 import { ProtectedEndpoint } from '@/core/infrastructure/decorators/protected-endpoint.decorator';
 import type { Request } from '@/core/infrastructure/types/http/request.type';
 import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt.auth.guard';
-import { ChallengeDto } from '@/modules/auth/infrastructure/http/dtos/challenge.dto';
-import { LoginDto } from '@/modules/auth/infrastructure/http/dtos/login.dto';
-import { RefreshTokenDto } from '@/modules/auth/infrastructure/http/dtos/refresh-token.dto';
+import { ChallengeDto } from '@/modules/auth/presentation/http/dtos/challenge.dto';
+import { LoginDto } from '@/modules/auth/presentation/http/dtos/login.dto';
+import { RefreshTokenDto } from '@/modules/auth/presentation/http/dtos/refresh-token.dto';
 import { UserNotConfirmedException } from '@/core/domain/exceptions/user-not-confirmed';
 import { InvalidCredentialsException } from '@/core/domain/exceptions/invalid-credentials';
 import { LoginUseCase } from '@/modules/auth/application/use-cases/login.use-case';

@@ -7,7 +7,7 @@ import { SettingModel, SettingSchema } from './infrastructure/database/models';
 import { SettingsRepository } from './infrastructure/database/repositories';
 import { SettingsService } from './infrastructure/services';
 import { SETTINGS_SERVICE_TOKEN } from './domain/interfaces/settings.service.interface';
-import { SettingsController } from './infrastructure/http/controllers';
+import { SettingsController } from './presentation/http/controllers';
 import {
   DeleteSettingHandler,
   UpdateSettingHandler,

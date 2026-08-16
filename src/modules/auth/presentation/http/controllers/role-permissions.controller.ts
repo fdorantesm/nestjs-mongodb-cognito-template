@@ -17,7 +17,7 @@ import type { QueryParser } from '@/core/types/general/query-parser.type';
 import { JwtAuthGuard } from '@/modules/auth/infrastructure/guards/jwt.auth.guard';
 import { PermissionGuard } from '@/modules/auth/infrastructure/guards/permission.guard';
 import { RequirePermissions } from '@/modules/auth/infrastructure/decorators/require-permissions.decorator';
-import { CreateRolePermissionDto } from '@/modules/auth/infrastructure/http/dtos/create-role-permission.dto';
+import { CreateRolePermissionDto } from '@/modules/auth/presentation/http/dtos/create-role-permission.dto';
 import { CreateRolePermissionUseCase } from '@/modules/auth/application/use-cases/create-role-permission.use-case';
 import { DeleteRolePermissionUseCase } from '@/modules/auth/application/use-cases/delete-role-permission.use-case';
 import { GetRolePermissionByIdUseCase } from '@/modules/auth/application/use-cases/get-role-permission-by-id.use-case';
