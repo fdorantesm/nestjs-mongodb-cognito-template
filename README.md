@@ -22,7 +22,8 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) with **CQRS**
 ```
 domain/              # Pure business logic, entities, interfaces, commands/queries/events
 application/         # Handlers orchestrate flow, use cases delegate to services
-infrastructure/      # Adapters: http/controllers, database/repositories, services
+infrastructure/      # Adapters: services, database/repositories, config, guards, decorators
+presentation/        # HTTP layer: controllers, DTOs, request/response mappers
 ```
 
 **Critical Rule**: Application layer NEVER imports from infrastructure layer. Use `@InjectService('ServiceName')` or `@InjectRepository('RepositoryName')` with interface types from domain.
@@ -52,7 +53,11 @@ src/
 │   ├── {module}/
 │   │   ├── domain/          # Entities, interfaces, commands, queries, events
 │   │   ├── application/     # Handlers, use cases
-│   │   └── infrastructure/  # Controllers, DTOs, repositories, services
+│   │   ├── infrastructure/  # Services, repositories, models, config, guards, decorators
+│   │   └── presentation/    # HTTP layer: controllers, DTOs
+│   │       └── http/
+│   │           ├── controllers/
+│   │           └── dtos/
 │   ├── auth/                # Authentication & authorization
 │   ├── identity/            # User identity management (Cognito)
 │   ├── settings/            # System settings
@@ -193,6 +198,9 @@ Follow this process to add a new feature (e.g., DELETE endpoint):
 
    - Add repository method (if needed): `database/repositories/{entity}.repository.ts`
    - Add service method (if needed): `services/{entity}.service.ts`
+
+4. **Presentation Layer** (`presentation/`)
+
    - Add controller method: `http/controllers/{entity}.controller.ts`
 
 4. **Module Registration** (`{module}.module.ts`)
@@ -216,8 +224,8 @@ src/modules/settings/domain/commands/delete-setting.command.ts
 src/modules/settings/application/commands/delete-setting.handler.ts
 src/modules/settings/application/use-cases/delete-setting.use-case.ts
 
-# 3. Infrastructure: Add controller endpoint
-src/modules/settings/infrastructure/http/controllers/settings.controller.ts
+# 3. Presentation: Add controller endpoint
+src/modules/settings/presentation/http/controllers/settings.controller.ts
 
 # 4. Module: Register handler and use case in settings.module.ts
 # 5. Compile and test
