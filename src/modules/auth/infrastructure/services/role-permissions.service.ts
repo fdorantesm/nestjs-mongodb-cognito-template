@@ -17,4 +17,12 @@ export class RolePermissionsService extends BaseService<
   ) {
     super(rolePermissionsRepository);
   }
+
+  public async findByRoleId(roleId: string): Promise<RolePermissionEntity[]> {
+    return this.rolePermissionsRepository.findByRoleId(roleId);
+  }
+
+  public async deleteByRoleId(roleId: string): Promise<void> {
+    await this.rolePermissionsRepository.delete({ roleId });
+  }
 }

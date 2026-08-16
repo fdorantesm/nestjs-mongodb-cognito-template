@@ -31,8 +31,12 @@ import { RespondChallengeUseCase } from '@/modules/auth/application/use-cases/re
 import { MeUseCase } from '@/modules/auth/application/use-cases/me.use-case';
 import { GetUserPermissionsUseCase } from '@/modules/auth/application/use-cases/get-user-permissions.use-case';
 import { GetUserExtrasUseCase } from '@/modules/users/application/use-cases/get-user-extras.use-case';
+import { RegisterUseCase } from '@/modules/auth/application/use-cases/register.use-case';
+import { ConfirmRegisterUseCase } from '@/modules/auth/application/use-cases/confirm-register.use-case';
 import { RequirePermissions } from '@/modules/auth/infrastructure/decorators';
 import { PermissionGuard } from '@/modules/auth/infrastructure/guards';
+import {RegistrationDto} from '@/modules/auth/presentation/http/dtos/register.dto';
+import {ConfirmRegisterDto} from '@/modules/auth/presentation/http/dtos';
 
 @ApiTags('auth')
 @Controller({ path: '/auth', version: VERSION_NEUTRAL })
@@ -45,7 +49,66 @@ export class AuthController {
     private readonly meUseCase: MeUseCase,
     private readonly getUserPermissionsUseCase: GetUserPermissionsUseCase,
     private readonly getUserExtrasUseCase: GetUserExtrasUseCase,
+    private readonly registerUseCase: RegisterUseCase,
+    private readonly confirmRegisterUseCase: ConfirmRegisterUseCase,
   ) {}
+
+  @Post('/register')
+  @Endpoint('Register a new user', { body: RegistrationDto })
+  public async register(@Ctx() ctx: Context, @Body() body: RegistrationDto) {
+    try {
+      await this.registerUseCase.execute(ctx, body);
+      return {
+        message: 'User registered successfully',
+      };
+    } catch (error) {
+      switch (error.name) {
+        case 'UserAlreadyRegisteredException': {
+          throw new ConflictException(error.message);
+        }
+        default: {
+          Logger.error(
+            `Register error: ${error.name} - ${error.message}`,
+            error.stack,
+            ctx.requestId,
+          );
+          throw new InternalServerErrorException();
+        }
+      }
+    }
+  }
+
+  @Post('/confirm-register')
+  @Endpoint('Confirm registration', { body: ConfirmRegisterDto })
+  public async confirmRegister(
+    @Ctx() ctx: Context,
+    @Body() body: ConfirmRegisterDto,
+  ) {
+    try {
+      return await this.confirmRegisterUseCase.execute(
+        ctx,
+        body.email,
+        body.confirmationCode,
+      );
+    } catch (error) {
+      switch (error.name) {
+        case 'UserAlreadyConfirmedException': {
+          throw new ConflictException(error.message);
+        }
+        case 'InvalidCredentialsException': {
+          throw new UnauthorizedException(new InvalidCredentialsException());
+        }
+        default: {
+          Logger.error(
+            `Confirm register error: ${error.name} - ${error.message}`,
+            error.stack,
+            ctx.requestId,
+          );
+          throw new InternalServerErrorException();
+        }
+      }
+    }
+  }
 
   @Post('/login')
   @Endpoint('User login', { body: LoginDto })
