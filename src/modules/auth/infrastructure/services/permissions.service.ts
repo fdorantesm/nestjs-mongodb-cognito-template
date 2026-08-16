@@ -17,4 +17,20 @@ export class PermissionsService extends BaseService<
   ) {
     super(permissionsRepository);
   }
+
+  public async findByCode(code: string): Promise<PermissionEntity | null> {
+    const found = await this.permissionsRepository.findOne({ code });
+    return found ?? null;
+  }
+
+  public async findByCodes(codes: string[]): Promise<PermissionEntity[]> {
+    return this.permissionsRepository.find({ code: { $in: codes } } as any);
+  }
+
+  public async findManyByUuids(uuids: string[]): Promise<PermissionEntity[]> {
+    if (this.permissionsRepository.findManyByUuids) {
+      return this.permissionsRepository.findManyByUuids(uuids);
+    }
+    return [];
+  }
 }

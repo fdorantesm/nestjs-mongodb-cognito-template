@@ -234,7 +234,7 @@ yarn build && yarn start:dev
 
 ### Key Rules When Adding Features
 
-1. **Never import infrastructure into application** - Use `@InjectService` or `@InjectRepository` with domain interface types
+cb 1. **Never import infrastructure into application** - Use `@InjectService` or `@InjectRepository` with domain interface types
 2. **Always use absolute imports** - `@/modules/...` instead of relative paths
 3. **Always use entity `create()` method** - Never `new Entity()`
 4. **One export per file** - Each class/interface/type in separate file

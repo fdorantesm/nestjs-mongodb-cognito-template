@@ -46,6 +46,8 @@ import { RefreshTokenUseCase } from '@/modules/auth/application/use-cases/refres
 import { RespondChallengeUseCase } from '@/modules/auth/application/use-cases/respond-challenge.use-case';
 import { MeUseCase } from '@/modules/auth/application/use-cases/me.use-case';
 import { GetUserPermissionsUseCase } from '@/modules/auth/application/use-cases/get-user-permissions.use-case';
+import { RegisterUseCase } from '@/modules/auth/application/use-cases/register.use-case';
+import { ConfirmRegisterUseCase } from '@/modules/auth/application/use-cases/confirm-register.use-case';
 import { CreatePermissionUseCase } from '@/modules/auth/application/use-cases/create-permission.use-case';
 import { CreateRolePermissionUseCase } from '@/modules/auth/application/use-cases/create-role-permission.use-case';
 import { CreateRoleUseCase } from '@/modules/auth/application/use-cases/create-role.use-case';
@@ -144,6 +146,8 @@ import { ROLE_PERMISSIONS_SERVICE_TOKEN } from '@/modules/auth/domain/interfaces
     LogoutUseCase,
     MeUseCase,
     RefreshTokenUseCase,
+    RegisterUseCase,
+    ConfirmRegisterUseCase,
     RespondChallengeUseCase,
     UpdatePermissionUseCase,
     UpdateRoleUseCase,
