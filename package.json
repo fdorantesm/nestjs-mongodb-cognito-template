@@ -1,6 +1,6 @@
 {
   "name": "nestjs-mongodb-cognito-template",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A NestJS template project with MongoDB and Cognito integration for rapid development.",
   "author": "Fernando Dorantes <fernando@dorant.es>",
   "private": false,
