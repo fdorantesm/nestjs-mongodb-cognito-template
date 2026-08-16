@@ -1,4 +1,4 @@
-FROM node:22 as build
+FROM node:24 AS build
 
 WORKDIR /src
 
@@ -13,7 +13,7 @@ RUN yarn build
 RUN rm -rf node_modules
 RUN yarn install --production=true
 
-FROM node:22-alpine as deploy
+FROM node:24-alpine AS deploy
 
 WORKDIR /app
 
