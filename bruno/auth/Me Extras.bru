@@ -1,0 +1,15 @@
+meta {
+  name: Me Extras
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/auth/me/extras
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

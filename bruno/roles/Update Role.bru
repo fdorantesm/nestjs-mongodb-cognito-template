@@ -1,0 +1,26 @@
+meta {
+  name: Update Role
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/v1/roles/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Updated Role Name",
+    "code": "updated_role_code"
+  }
+}

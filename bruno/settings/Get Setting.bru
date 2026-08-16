@@ -1,0 +1,19 @@
+meta {
+  name: Get Setting
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/settings/:key
+  body: none
+  auth: bearer
+}
+
+params:path {
+  key: 
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
