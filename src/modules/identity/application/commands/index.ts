@@ -1,3 +1,4 @@
+export * from './associate-software-token.handler';
 export * from './confirm-register.handler';
 export * from './create-identity-user.handler';
 export * from './delete-identity-user.handler';

@@ -40,9 +40,6 @@ import { RolePermissionsRepository } from '@/modules/auth/infrastructure/databas
 import { PermissionsRepository } from '@/modules/auth/infrastructure/database/repositories/permissions.repository';
 import { PermissionsService } from '@/modules/auth/infrastructure/services/permissions.service';
 import { RolePermissionsService } from '@/modules/auth/infrastructure/services/role-permissions.service';
-import { UserRegisteredEventHandler } from '@/modules/auth/application/events/user-registered.event-handler';
-import { RegisterUseCase } from '@/modules/auth/application/use-cases/register.use-case';
-import { ConfirmRegisterUseCase } from '@/modules/auth/application/use-cases/confirm-register.use-case';
 import { LoginUseCase } from '@/modules/auth/application/use-cases/login.use-case';
 import { LogoutUseCase } from '@/modules/identity/application/use-cases/logout.use-case';
 import { RefreshTokenUseCase } from '@/modules/auth/application/use-cases/refresh-token.use-case';
@@ -130,7 +127,6 @@ import { ROLE_PERMISSIONS_SERVICE_TOKEN } from '@/modules/auth/domain/interfaces
     JwtAuthGuard,
     PermissionGuard,
     // Use Cases
-    ConfirmRegisterUseCase,
     CreatePermissionUseCase,
     CreateRolePermissionUseCase,
     CreateRoleUseCase,
@@ -148,12 +144,9 @@ import { ROLE_PERMISSIONS_SERVICE_TOKEN } from '@/modules/auth/domain/interfaces
     LogoutUseCase,
     MeUseCase,
     RefreshTokenUseCase,
-    RegisterUseCase,
     RespondChallengeUseCase,
     UpdatePermissionUseCase,
     UpdateRoleUseCase,
-    // Event Handlers
-    UserRegisteredEventHandler,
   ],
   controllers: [
     AuthController,

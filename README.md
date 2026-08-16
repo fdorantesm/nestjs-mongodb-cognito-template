@@ -92,6 +92,9 @@ test/                        # E2E tests
    # Edit .env with your configuration
    ```
 
+   > ⚠️ **Cognito settings are mandatory** – make sure `COGNITO_REGION` and `COGNITO_USER_POOL_ID` (at minimum) are set.
+   > Missing values will cause startup errors like `Error: Region is missing`.
+
 3. **Start MongoDB**:
 
    ```bash

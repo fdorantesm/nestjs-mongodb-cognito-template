@@ -8,11 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import expressRateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
 import { HttpServerConfiguration } from '@/core/infrastructure/types';
-import { AntiThrottleConfiguration } from '@/core/infrastructure/types/http/throttles.type';
 import { MainModule } from '@/main.module';
 import { PaginatedResponseDto } from '@/core/infrastructure/http/dtos';
 import { UserResponseDto } from '@/modules/users/infrastructure/http/dtos';
@@ -37,8 +35,6 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
   const config = configService.get<HttpServerConfiguration>('server');
-  const antiThrottle =
-    configService.get<AntiThrottleConfiguration>('antiThrottle');
 
   const { host, port } = config;
 
@@ -65,30 +61,7 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  });
-
   app.use(helmet());
-
-  app.use(
-    expressRateLimit({
-      windowMs: antiThrottle.interval,
-      max: antiThrottle.maxRequest,
-      standardHeaders: true,
-      legacyHeaders: false,
-      keyGenerator: (req) => {
-        if (!req.ip) {
-          console.error('Warning: request.ip is missing!');
-          return req.socket.remoteAddress;
-        }
-
-        return req.ip.replace(/:\d+[^:]*$/, '');
-      },
-    }),
-  );
 
   const documentBuilder = new DocumentBuilder()
     .setTitle('API Docs')
