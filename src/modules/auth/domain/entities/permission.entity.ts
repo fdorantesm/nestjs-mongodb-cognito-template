@@ -10,6 +10,14 @@ export class PermissionEntity extends BaseEntity<Permission> {
     return new PermissionEntity(permission);
   }
 
+  public getName(): string {
+    return this._data.name;
+  }
+
+  public getCode(): string {
+    return this._data.code;
+  }
+
   public toObject(): Permission {
     return {
       ...this._data,

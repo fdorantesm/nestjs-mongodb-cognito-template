@@ -1,5 +1,5 @@
 export interface Pagination<T> {
-  docs: T[];
+  items: T[];
   total: number;
   limit: number;
   page: number | undefined;

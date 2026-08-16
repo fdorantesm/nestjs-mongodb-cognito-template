@@ -5,5 +5,6 @@ export const environmentConfigLoader = registerAs(
   'environment',
   (): EnvironmentConfig => ({
     nodeEnv: process.env.NODE_ENV || 'development',
+    isDebug: process.env.DEBUG === 'true',
   }),
 );

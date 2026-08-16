@@ -13,7 +13,13 @@ import helmet from 'helmet';
 
 import { HttpServerConfiguration } from '@/core/infrastructure/types';
 import { AntiThrottleConfiguration } from '@/core/infrastructure/types/http/throttles.type';
-import { AppModule } from '@/app.module';
+import { MainModule } from '@/main.module';
+import { PaginatedResponseDto } from '@/core/infrastructure/http/dtos';
+import { UserResponseDto } from '@/modules/users/infrastructure/http/dtos';
+import {
+  RoleResponseDto,
+  PermissionResponseDto,
+} from '@/modules/auth/infrastructure/http/dtos';
 
 async function bootstrap() {
   const logger = new ConsoleLogger({
@@ -24,7 +30,7 @@ async function bootstrap() {
     compact: true,
   });
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(MainModule, {
     logger,
     snapshot: true,
   });
@@ -96,7 +102,14 @@ async function bootstrap() {
     })
     .build();
 
-  const document = SwaggerModule.createDocument(app, documentBuilder);
+  const document = SwaggerModule.createDocument(app, documentBuilder, {
+    extraModels: [
+      PaginatedResponseDto,
+      UserResponseDto,
+      RoleResponseDto,
+      PermissionResponseDto,
+    ],
+  });
 
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {

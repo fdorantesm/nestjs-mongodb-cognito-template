@@ -3,4 +3,5 @@ import type { RolePermissionsAggregate } from '@/modules/auth/domain/aggregates/
 
 export interface Role extends BaseProps, Partial<RolePermissionsAggregate> {
   name: string;
+  code: string;
 }

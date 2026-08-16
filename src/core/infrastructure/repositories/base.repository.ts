@@ -37,20 +37,26 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
   }
 
   public async findById(uuid: string): Promise<E> {
-    const row = await this.model.findOne({ uuid }).lean();
+    const row = await this.model.findOne({ uuid }).exec();
     if (row) {
-      return this.mapToEntity(row as I);
+      return this.mapToEntity(
+        row.toObject({ getters: true, virtuals: true }) as I,
+      );
     }
   }
 
   public async findManyByUuids?(uuids: string[]): Promise<E[]> {
-    const rows = await this.model.find({ uuid: { $in: uuids } }).lean();
-    return rows.map((row) => this.mapToEntity(row as I));
+    const rows = await this.model.find({ uuid: { $in: uuids } }).exec();
+    return rows.map((row) =>
+      this.mapToEntity(row.toObject({ getters: true, virtuals: true }) as I),
+    );
   }
 
   public async createMany?(contract: I[]): Promise<E[]> {
     const rows = await this.model.create(contract);
-    return rows.map((row) => this.mapToEntity(row.toJSON() as I));
+    return rows.map((row) =>
+      this.mapToEntity(row.toObject({ getters: true, virtuals: false }) as I),
+    );
   }
 
   public async findOne(filter: Filter<I> & any): Promise<E> {
@@ -58,10 +64,12 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
       filter.isDeleted = this.options.softDelete;
     }
 
-    const row = await this.model.findOne(filter).lean();
+    const row = await this.model.findOne(filter).exec();
 
     if (row) {
-      return this.mapToEntity(row as I);
+      return this.mapToEntity(
+        row.toObject({ getters: true, virtuals: true }) as I,
+      );
     }
 
     return undefined;
@@ -74,9 +82,11 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
   ): Promise<E> {
     const row = await this.model
       .findOne({ ...filter } as I, projection, options)
-      .lean();
+      .exec();
     if (row) {
-      return this.mapToEntity(row as I);
+      return this.mapToEntity(
+        row.toObject({ getters: true, virtuals: true }) as I,
+      );
     }
 
     return undefined;
@@ -93,8 +103,10 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
       q.isDeleted = this.options.softDelete;
     }
 
-    const rows = await this.model.find(q as I, projection, options).lean();
-    return rows.map((row) => this.mapToEntity(row as I));
+    const rows = await this.model.find(q as I, projection, options).exec();
+    return rows.map((row) =>
+      this.mapToEntity(row.toObject({ getters: true, virtuals: true }) as I),
+    );
   }
 
   public async all(
@@ -102,8 +114,10 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
     projection?: Json,
     options?: QueryParsedOptions,
   ): Promise<E[]> {
-    const rows = await this.model.find(filter as I, projection, options).lean();
-    return rows.map((row) => this.mapToEntity(row as I));
+    const rows = await this.model.find(filter as I, projection, options).exec();
+    return rows.map((row) =>
+      this.mapToEntity(row.toObject({ getters: true, virtuals: true }) as I),
+    );
   }
 
   public async find(
@@ -117,15 +131,19 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
       q.isDeleted = this.options.softDelete;
     }
 
-    const rows = await this.model.find(q as I, projection, options).lean();
+    const rows = await this.model.find(q as I, projection, options).exec();
 
-    return rows.map((row) => this.mapToEntity(row as I));
+    return rows.map((row) =>
+      this.mapToEntity(row.toObject({ getters: true, virtuals: true }) as I),
+    );
   }
 
   public async create(data: I): Promise<E> {
     const row = await this.model.create(data);
     if (row) {
-      return this.mapToEntity(row as I);
+      return this.mapToEntity(
+        row.toObject({ getters: true, virtuals: true }) as I,
+      );
     }
   }
 
@@ -235,17 +253,21 @@ export class BaseRepository<I, E extends Entity<I>> implements Crud<I, E> {
     const result = await this.model.paginate(filter as I, options);
 
     return {
-      docs: result.docs.map((row) =>
-        this.mapToEntity(options.lean ? row : (row.toJSON() as I)),
+      items: result.docs.map((row) =>
+        this.mapToEntity(
+          options.lean
+            ? row
+            : (row.toObject({ getters: true, virtuals: true }) as I),
+        ),
       ),
-      total: result.total,
+      total: result.totalDocs,
       limit: result.limit,
       page: result.page,
-      pages: result.pages,
-      offset: result.offset,
-      prevPage: result.page - 1 > 0 ? result.page - 1 : undefined,
-      nextPage: result.page + 1 <= result.pages ? result.page + 1 : undefined,
-      hasMore: result.page < result.pages,
+      pages: result.totalPages,
+      offset: (result.page - 1) * result.limit,
+      prevPage: result.prevPage || undefined,
+      nextPage: result.nextPage || undefined,
+      hasMore: result.hasNextPage,
     };
   }
 }

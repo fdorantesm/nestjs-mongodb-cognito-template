@@ -1,24 +1,21 @@
-import { EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { ConflictException, Logger } from '@nestjs/common';
 
 import type { Context } from '@/core/domain/interfaces/context.interface';
 import { UseCase } from '@/core/application/case.decorator';
 import type { Executable } from '@/core/domain/executable.interface';
 import type { Registration } from '@/modules/auth/domain/interfaces/registration.interface';
-import { IdentityService } from '@/modules/auth/infrastructure/services/identity.service';
-import { InjectService } from '@/core/application/inject-service.decorator';
+import { RegisterIdentityUserCommand } from '@/modules/identity/domain/commands/register-identity-user.command';
+import { GetUserCountByEmailQuery } from '@/modules/users/domain/queries/get-user-count-by-email.query';
 import { UserRegisteredEvent } from '@/modules/auth/domain/events/user-registered.event';
-import type { UsersService } from '@/modules/auth/infrastructure/services/users.service';
 import { UserAlreadyRegisteredException } from '@/modules/auth/domain/exceptions/user-already-registered.exception';
 
 @UseCase()
 export class RegisterUseCase implements Executable {
   constructor(
-    @InjectService('IdentityService')
-    private readonly identitiyService: IdentityService,
+    private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
-    @InjectService('UsersService')
-    private readonly usersService: UsersService,
+    private readonly queryBus: QueryBus,
   ) {}
 
   public async execute(
@@ -30,9 +27,9 @@ export class RegisterUseCase implements Executable {
       context.requestId,
     );
 
-    const userExists = await this.usersService.count({
-      email: registration.email,
-    });
+    const userExists = await this.queryBus.execute<number>(
+      new GetUserCountByEmailQuery(registration.email) as any,
+    );
 
     if (userExists) {
       throw new UserAlreadyRegisteredException(
@@ -41,10 +38,14 @@ export class RegisterUseCase implements Executable {
     }
 
     try {
-      const { UserSub } = await this.identitiyService.register({
-        email: registration.email,
-        password: registration.password,
-      });
+      const { UserSub } = await this.commandBus.execute(
+        new RegisterIdentityUserCommand(
+          registration.email,
+          registration.password,
+          registration.displayName,
+          (registration as any).phone,
+        ),
+      );
 
       this.eventBus.publish(
         new UserRegisteredEvent(UserSub, {
