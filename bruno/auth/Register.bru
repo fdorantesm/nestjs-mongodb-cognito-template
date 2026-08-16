@@ -12,10 +12,16 @@ post {
 
 body:json {
   {
-    "email": "user@example.com",
-    "password": "MyPassword123*",
-    "username": "myusername",
-    "displayName": "My Display Name",
-    "phone": "+525512345678"
+    "email": "kim.wexler@example.com",
+    "password": "OpenSesame1!",
+    "username": "kimwexler",
+    "displayName": "Kim W",
+    "phone": "+12345678900"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar("session_email", req.body.email)
   }
 }

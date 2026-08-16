@@ -12,18 +12,19 @@ post {
 
 body:json {
   {
-    "username": "user@example.com",
-    "challengeName": "EMAIL_OTP",
-    "session": "session-token-from-login",
-    "value": "123456"
+    "username": "{{session_email}}",
+    "challengeName": "{{challengeName}}",
+    "session": "{{session}}",
+    "value": "000000"
   }
 }
 
 script:post-response {
-  if (res.status === 200 && res.body.accessToken) {
-    bru.setEnvVar("accessToken", res.body.accessToken);
+  const data = res.body.data || res.body;
+  if (data.accessToken) {
+    bru.setEnvVar("accessToken", data.accessToken);
   }
-  if (res.status === 200 && res.body.refreshToken) {
-    bru.setEnvVar("refreshToken", res.body.refreshToken);
+  if (data.refreshToken) {
+    bru.setEnvVar("refreshToken", data.refreshToken);
   }
 }
