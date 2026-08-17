@@ -45,7 +45,7 @@ export class PermissionGuard implements CanActivate {
 
     const rolePermissions = await this.queryBus.execute<RolePermissionEntity[]>(
       new FindRolePermissionsQuery({
-        roleId: user.roleId as string,
+        roleId: user.roleId,
       }),
     );
 
@@ -56,7 +56,7 @@ export class PermissionGuard implements CanActivate {
     const permissionIds = rolePermissions.map((rp) => rp.getPermissionId());
     const userPermissions = await this.queryBus.execute<PermissionEntity[]>(
       new FindPermissionsQuery({
-        uuid: { $in: permissionIds } as any,
+        uuid: { $in: permissionIds },
       }),
     );
 

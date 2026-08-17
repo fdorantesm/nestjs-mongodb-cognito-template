@@ -35,8 +35,8 @@ import { RegisterUseCase } from '@/modules/auth/application/use-cases/register.u
 import { ConfirmRegisterUseCase } from '@/modules/auth/application/use-cases/confirm-register.use-case';
 import { RequirePermissions } from '@/modules/auth/infrastructure/decorators';
 import { PermissionGuard } from '@/modules/auth/infrastructure/guards';
-import {RegistrationDto} from '@/modules/auth/presentation/http/dtos/register.dto';
-import {ConfirmRegisterDto} from '@/modules/auth/presentation/http/dtos';
+import { RegistrationDto } from '@/modules/auth/presentation/http/dtos/register.dto';
+import { ConfirmRegisterDto } from '@/modules/auth/presentation/http/dtos';
 
 @ApiTags('auth')
 @Controller({ path: '/auth', version: VERSION_NEUTRAL })
