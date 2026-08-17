@@ -1,21 +1,21 @@
-import {INestApplication,ValidationPipe} from '@nestjs/common';
-import {Test,TestingModule} from '@nestjs/testing';
-import {EventBus} from '@nestjs/cqrs';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { EventBus } from '@nestjs/cqrs';
 
-import {IDENTITY_SERVICE_TOKEN} from '@/modules/identity/domain/interfaces/identity.service.interface';
-import {AuthE2eModule} from '#/auth-e2e.module';
-import {UsersMemoryRepository} from '@/modules/users/infrastructure/database/repositories/users.memory-repository';
-import {RolesMemoryRepository} from '@/modules/auth/infrastructure/database/repositories/roles.memory-repository';
-import {post,get} from '#/helpers/request.helper';
+import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/identity.service.interface';
+import { AuthE2eModule } from '#/auth-e2e.module';
+import { UsersMemoryRepository } from '@/modules/users/infrastructure/database/repositories/users.memory-repository';
+import { RolesMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/roles.memory-repository';
+import { post, get } from '#/helpers/request.helper';
 
-describe('Auth Endpoints (e2e)',() => {
+describe('Auth Endpoints (e2e)', () => {
   let app: INestApplication;
   let httpServer: any;
   let mockIdentityService: any;
   let usersMemoryRepository: UsersMemoryRepository;
   let rolesMemoryRepository: RolesMemoryRepository;
 
-  const testUser={
+  const testUser = {
     email: 'test@example.com',
     password: 'TestPassword123!',
     username: 'testuser',
@@ -23,7 +23,7 @@ describe('Auth Endpoints (e2e)',() => {
     phone: '+525512345678',
   };
 
-  const mockTokens={
+  const mockTokens = {
     accessToken:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
     idToken:
@@ -34,7 +34,7 @@ describe('Auth Endpoints (e2e)',() => {
 
   beforeAll(async () => {
     // Create mock identity service
-    mockIdentityService={
+    mockIdentityService = {
       register: jest.fn().mockResolvedValue({
         UserSub: 'mock-user-sub-123',
         UserConfirmed: false,
@@ -74,7 +74,7 @@ describe('Auth Endpoints (e2e)',() => {
       }),
     };
 
-    const mockEventBus={
+    const mockEventBus = {
       publish: jest.fn(),
       publishAll: jest.fn(),
       register: jest.fn(),
@@ -84,10 +84,10 @@ describe('Auth Endpoints (e2e)',() => {
       ofType: jest.fn(),
     };
 
-    usersMemoryRepository=new UsersMemoryRepository();
-    rolesMemoryRepository=new RolesMemoryRepository();
+    usersMemoryRepository = new UsersMemoryRepository();
+    rolesMemoryRepository = new RolesMemoryRepository();
 
-    const moduleFixture: TestingModule=await Test.createTestingModule({
+    const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AuthE2eModule],
     })
       .overrideProvider(IDENTITY_SERVICE_TOKEN)
@@ -100,7 +100,7 @@ describe('Auth Endpoints (e2e)',() => {
       .useValue(rolesMemoryRepository)
       .compile();
 
-    app=moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -110,7 +110,7 @@ describe('Auth Endpoints (e2e)',() => {
     );
     await app.init();
 
-    httpServer=app.getHttpAdapter().getInstance();
+    httpServer = app.getHttpAdapter().getInstance();
 
     // Create test role
     await rolesMemoryRepository.create({
@@ -161,7 +161,7 @@ describe('Auth Endpoints (e2e)',() => {
   });
 
   afterAll(async () => {
-    if(app) {
+    if (app) {
       await app.close();
     }
   });
@@ -195,9 +195,9 @@ describe('Auth Endpoints (e2e)',() => {
     jest.clearAllMocks();
   });
 
-  describe('POST /auth/register',() => {
-    it('should register a new user successfully',async () => {
-      const {statusCode,body}=await post(httpServer,'/auth/register',{
+  describe('POST /auth/register', () => {
+    it('should register a new user successfully', async () => {
+      const { statusCode, body } = await post(httpServer, '/auth/register', {
         email: 'newuser@example.com', // Use different email to avoid conflict
         password: testUser.password,
         username: 'newuser',
@@ -216,8 +216,8 @@ describe('Auth Endpoints (e2e)',() => {
       });
     });
 
-    it('should register without optional phone',async () => {
-      const {statusCode,body}=await post(httpServer,'/auth/register',{
+    it('should register without optional phone', async () => {
+      const { statusCode, body } = await post(httpServer, '/auth/register', {
         email: 'another@example.com',
         password: testUser.password,
         username: 'anotheruser',
@@ -228,11 +228,11 @@ describe('Auth Endpoints (e2e)',() => {
       expect(body.data.message).toBe('User registered successfully');
     });
 
-    it('should fail with 409 if user already exists',async () => {
-      const duplicateEmail='duplicate@example.com';
+    it('should fail with 409 if user already exists', async () => {
+      const duplicateEmail = 'duplicate@example.com';
 
       // First registration succeeds
-      const {statusCode: firstStatus}=await post(
+      const { statusCode: firstStatus } = await post(
         httpServer,
         '/auth/register',
         {
@@ -263,7 +263,7 @@ describe('Auth Endpoints (e2e)',() => {
       } as any);
 
       // Second registration should fail with 409 because user exists in DB
-      const {statusCode: secondStatus}=await post(
+      const { statusCode: secondStatus } = await post(
         httpServer,
         '/auth/register',
         {
@@ -278,8 +278,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(secondStatus).toBe(409);
     });
 
-    it('should fail with 400 if email is invalid',async () => {
-      const {statusCode}=await post(httpServer,'/auth/register',{
+    it('should fail with 400 if email is invalid', async () => {
+      const { statusCode } = await post(httpServer, '/auth/register', {
         email: 'invalid-email',
         password: testUser.password,
         username: 'testuser2',
@@ -290,8 +290,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.register).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if password is too weak',async () => {
-      const {statusCode}=await post(httpServer,'/auth/register',{
+    it('should fail with 400 if password is too weak', async () => {
+      const { statusCode } = await post(httpServer, '/auth/register', {
         email: 'test2@example.com',
         password: '123',
         username: 'testuser3',
@@ -302,8 +302,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.register).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if username is invalid',async () => {
-      const {statusCode}=await post(httpServer,'/auth/register',{
+    it('should fail with 400 if username is invalid', async () => {
+      const { statusCode } = await post(httpServer, '/auth/register', {
         email: 'test3@example.com',
         password: testUser.password,
         username: 'ab', // Too short
@@ -313,8 +313,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(400);
     });
 
-    it('should fail with 400 if required fields are missing',async () => {
-      const {statusCode}=await post(httpServer,'/auth/register',{
+    it('should fail with 400 if required fields are missing', async () => {
+      const { statusCode } = await post(httpServer, '/auth/register', {
         email: testUser.email,
         // missing password, username, displayName
       });
@@ -323,8 +323,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.register).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if phone format is invalid',async () => {
-      const {statusCode}=await post(httpServer,'/auth/register',{
+    it('should fail with 400 if phone format is invalid', async () => {
+      const { statusCode } = await post(httpServer, '/auth/register', {
         email: 'test4@example.com',
         password: testUser.password,
         username: 'testuser4',
@@ -336,9 +336,9 @@ describe('Auth Endpoints (e2e)',() => {
     });
   });
 
-  describe('POST /auth/confirm-register',() => {
-    it.skip('should confirm registration successfully',async () => {
-      const {statusCode,body}=await post(
+  describe('POST /auth/confirm-register', () => {
+    it.skip('should confirm registration successfully', async () => {
+      const { statusCode, body } = await post(
         httpServer,
         '/auth/confirm-register',
         {
@@ -355,12 +355,12 @@ describe('Auth Endpoints (e2e)',() => {
       });
     });
 
-    it('should fail with 401 if confirmation code is invalid',async () => {
-      const error=new Error('Invalid verification code');
-      error.name='InvalidCredentialsException';
+    it('should fail with 401 if confirmation code is invalid', async () => {
+      const error = new Error('Invalid verification code');
+      error.name = 'InvalidCredentialsException';
       mockIdentityService.confirmRegister.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(httpServer,'/auth/confirm-register',{
+      const { statusCode } = await post(httpServer, '/auth/confirm-register', {
         email: 'unconfirmed@example.com', // Use different email
         confirmationCode: '000000',
       });
@@ -368,8 +368,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 400 if confirmation code format is invalid',async () => {
-      const {statusCode}=await post(httpServer,'/auth/confirm-register',{
+    it('should fail with 400 if confirmation code format is invalid', async () => {
+      const { statusCode } = await post(httpServer, '/auth/confirm-register', {
         email: testUser.email,
         confirmationCode: 'abc', // Must be 6 digits
       });
@@ -378,8 +378,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.confirmRegister).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if required fields are missing',async () => {
-      const {statusCode}=await post(httpServer,'/auth/confirm-register',{
+    it('should fail with 400 if required fields are missing', async () => {
+      const { statusCode } = await post(httpServer, '/auth/confirm-register', {
         email: testUser.email,
         // missing confirmationCode
       });
@@ -388,18 +388,18 @@ describe('Auth Endpoints (e2e)',() => {
     });
   });
 
-  describe('POST /auth/login',() => {
-    it('should login successfully',async () => {
-      const {statusCode,body}=await post(httpServer,'/auth/login',{
+  describe('POST /auth/login', () => {
+    it('should login successfully', async () => {
+      const { statusCode, body } = await post(httpServer, '/auth/login', {
         email: testUser.email,
         password: testUser.password,
       });
 
       expect(statusCode).toBe(201);
-      expect(body.data).toHaveProperty('accessToken',mockTokens.accessToken);
-      expect(body.data).toHaveProperty('refreshToken',mockTokens.refreshToken);
-      expect(body.data).toHaveProperty('expiresIn',mockTokens.expiresIn);
-      expect(body.data).toHaveProperty('tokenType','Bearer');
+      expect(body.data).toHaveProperty('accessToken', mockTokens.accessToken);
+      expect(body.data).toHaveProperty('refreshToken', mockTokens.refreshToken);
+      expect(body.data).toHaveProperty('expiresIn', mockTokens.expiresIn);
+      expect(body.data).toHaveProperty('tokenType', 'Bearer');
 
       expect(mockIdentityService.initiateAuth).toHaveBeenCalledWith(
         testUser.email,
@@ -407,12 +407,12 @@ describe('Auth Endpoints (e2e)',() => {
       );
     });
 
-    it('should fail with 401 if credentials are invalid',async () => {
-      const error=new Error('Incorrect username or password');
-      error.name='InvalidCredentialsException';
+    it('should fail with 401 if credentials are invalid', async () => {
+      const error = new Error('Incorrect username or password');
+      error.name = 'InvalidCredentialsException';
       mockIdentityService.initiateAuth.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(httpServer,'/auth/login',{
+      const { statusCode } = await post(httpServer, '/auth/login', {
         email: testUser.email,
         password: 'WrongPassword123!',
       });
@@ -420,12 +420,12 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 409 if user is not confirmed',async () => {
-      const error=new Error('User is not confirmed');
-      error.name='UserNotConfirmedException';
+    it('should fail with 409 if user is not confirmed', async () => {
+      const error = new Error('User is not confirmed');
+      error.name = 'UserNotConfirmedException';
       mockIdentityService.initiateAuth.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(httpServer,'/auth/login',{
+      const { statusCode } = await post(httpServer, '/auth/login', {
         email: testUser.email,
         password: testUser.password,
       });
@@ -433,12 +433,12 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(409);
     });
 
-    it('should fail with 401 if user does not exist',async () => {
-      const error=new Error('User does not exist');
-      error.name='UserNotFoundException';
+    it('should fail with 401 if user does not exist', async () => {
+      const error = new Error('User does not exist');
+      error.name = 'UserNotFoundException';
       mockIdentityService.initiateAuth.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(httpServer,'/auth/login',{
+      const { statusCode } = await post(httpServer, '/auth/login', {
         email: 'nonexistent@example.com',
         password: testUser.password,
       });
@@ -446,8 +446,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 400 if required fields are missing',async () => {
-      const {statusCode}=await post(httpServer,'/auth/login',{
+    it('should fail with 400 if required fields are missing', async () => {
+      const { statusCode } = await post(httpServer, '/auth/login', {
         email: testUser.email,
         // missing password
       });
@@ -456,8 +456,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.initiateAuth).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if email format is invalid',async () => {
-      const {statusCode}=await post(httpServer,'/auth/login',{
+    it('should fail with 400 if email format is invalid', async () => {
+      const { statusCode } = await post(httpServer, '/auth/login', {
         email: 'invalid-email',
         password: testUser.password,
       });
@@ -466,9 +466,9 @@ describe('Auth Endpoints (e2e)',() => {
     });
   });
 
-  describe('POST /auth/refresh',() => {
-    it('should refresh token successfully',async () => {
-      const {statusCode,body}=await post(
+  describe('POST /auth/refresh', () => {
+    it('should refresh token successfully', async () => {
+      const { statusCode, body } = await post(
         httpServer,
         '/auth/refresh',
         {
@@ -482,7 +482,7 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(201);
       expect(body.data).toHaveProperty('accessToken');
       expect(body.data).toHaveProperty('expiresIn');
-      expect(body.data).toHaveProperty('tokenType','Bearer');
+      expect(body.data).toHaveProperty('tokenType', 'Bearer');
       expect(body.data.accessToken).toBe('new-access-token');
 
       expect(mockIdentityService.refreshToken).toHaveBeenCalledWith(
@@ -491,12 +491,12 @@ describe('Auth Endpoints (e2e)',() => {
       );
     });
 
-    it('should fail with 401 if refresh token is invalid',async () => {
-      const error=new Error('Invalid refresh token');
-      error.name='InvalidCredentialsException';
+    it('should fail with 401 if refresh token is invalid', async () => {
+      const error = new Error('Invalid refresh token');
+      error.name = 'InvalidCredentialsException';
       mockIdentityService.refreshToken.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(
+      const { statusCode } = await post(
         httpServer,
         '/auth/refresh',
         {
@@ -510,12 +510,12 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 401 if refresh token is expired',async () => {
-      const error=new Error('Refresh Token has expired');
-      error.name='InvalidCredentialsException';
+    it('should fail with 401 if refresh token is expired', async () => {
+      const error = new Error('Refresh Token has expired');
+      error.name = 'InvalidCredentialsException';
       mockIdentityService.refreshToken.mockRejectedValueOnce(error);
 
-      const {statusCode}=await post(
+      const { statusCode } = await post(
         httpServer,
         '/auth/refresh',
         {
@@ -529,8 +529,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 401 if authorization header is missing',async () => {
-      const {statusCode}=await post(httpServer,'/auth/refresh',{
+    it('should fail with 401 if authorization header is missing', async () => {
+      const { statusCode } = await post(httpServer, '/auth/refresh', {
         refreshToken: mockTokens.refreshToken,
       });
 
@@ -538,8 +538,8 @@ describe('Auth Endpoints (e2e)',() => {
       expect(mockIdentityService.refreshToken).not.toHaveBeenCalled();
     });
 
-    it('should fail with 400 if refresh token is missing',async () => {
-      const {statusCode}=await post(
+    it('should fail with 400 if refresh token is missing', async () => {
+      const { statusCode } = await post(
         httpServer,
         '/auth/refresh',
         {},
@@ -553,11 +553,11 @@ describe('Auth Endpoints (e2e)',() => {
     });
   });
 
-  describe('GET /auth/me',() => {
-    it.skip('should get current user with valid token',async () => {
+  describe('GET /auth/me', () => {
+    it.skip('should get current user with valid token', async () => {
       // This test requires mocking the database/users service
       // Skipped for now as it goes beyond identity service mocking
-      const {statusCode,body}=await get(httpServer,'/auth/me',{
+      const { statusCode, body } = await get(httpServer, '/auth/me', {
         authorization: `Bearer ${mockTokens.accessToken}`,
       });
 
@@ -569,34 +569,34 @@ describe('Auth Endpoints (e2e)',() => {
       );
     });
 
-    it('should fail with 401 without token',async () => {
-      const {statusCode}=await get(httpServer,'/auth/me');
+    it('should fail with 401 without token', async () => {
+      const { statusCode } = await get(httpServer, '/auth/me');
 
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 401 with invalid token',async () => {
+    it('should fail with 401 with invalid token', async () => {
       mockIdentityService.validateAccessToken.mockRejectedValueOnce({
         name: 'JsonWebTokenError',
         message: 'jwt malformed',
       });
 
-      const {statusCode}=await get(httpServer,'/auth/me',{
+      const { statusCode } = await get(httpServer, '/auth/me', {
         authorization: 'Bearer invalid-token',
       });
 
       expect(statusCode).toBe(401);
     });
 
-    it('should fail with 401 with malformed authorization header',async () => {
-      const {statusCode}=await get(httpServer,'/auth/me',{
+    it('should fail with 401 with malformed authorization header', async () => {
+      const { statusCode } = await get(httpServer, '/auth/me', {
         authorization: mockTokens.accessToken, // Missing "Bearer" prefix
       });
 
       expect(statusCode).toBe(401);
     });
 
-    it.skip('should fail with 401 with expired token',async () => {
+    it.skip('should fail with 401 with expired token', async () => {
       // This test requires mocking the database/users service
       // Skipped for now as it goes beyond identity service mocking
       mockIdentityService.validateAccessToken.mockRejectedValueOnce({
@@ -604,7 +604,7 @@ describe('Auth Endpoints (e2e)',() => {
         message: 'jwt expired',
       });
 
-      const {statusCode}=await get(httpServer,'/auth/me',{
+      const { statusCode } = await get(httpServer, '/auth/me', {
         authorization: 'Bearer expired-token',
       });
 

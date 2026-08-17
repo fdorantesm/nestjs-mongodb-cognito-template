@@ -52,7 +52,7 @@ jobs:
 
   e2e-tests:
     name: e2e-tests
-    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,10 +71,15 @@ jobs:
       - name: Verify aggregate status
         run: |
           STATUS_OK=true
-          for JOB in lint build unit-tests e2e-tests; do
-            RESULT="${{ needs[JOB].result }}"
-            if [ -z "$RESULT" ] || [ "$RESULT" != "success" ]; then
-              echo "$JOB: $RESULT (skipped or failed)"
+          for JOB_RESULT in \
+            "lint:${{ needs.lint.result }}" \
+            "build:${{ needs.build.result }}" \
+            "unit-tests:${{ needs['unit-tests'].result }}" \
+            "e2e-tests:${{ needs['e2e-tests'].result }}"; do
+            JOB="${JOB_RESULT%%:*}"
+            RESULT="${JOB_RESULT#*:}"
+            if [ "$RESULT" != "success" ] && [ "$RESULT" != "skipped" ]; then
+              echo "$JOB: $RESULT (failed)"
               STATUS_OK=false
             else
               echo "$JOB: $RESULT"
