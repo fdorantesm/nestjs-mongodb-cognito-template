@@ -166,7 +166,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
     }
 
     const document = await query;
-    return this.mapToEntity(document as I);
+    return this.mapToEntity(document);
   }
 
   public async update(filter: Partial<I>, payload: Partial<I>): Promise<E> {
@@ -179,7 +179,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
         multi: false,
       },
     );
-    return this.mapToEntity(document as I);
+    return this.mapToEntity(document);
   }
 
   public async delete(filter: Partial<I>): Promise<boolean> {
@@ -220,7 +220,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
 
   public async restore(filter: Partial<I>): Promise<E> {
     const document = await this.store.updateOne(filter, { isDeleted: false });
-    return this.mapToEntity(document as I);
+    return this.mapToEntity(document);
   }
 
   public async restoreMany(filter: Partial<I>): Promise<E[]> {
@@ -238,7 +238,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
   }
 
   public async existsMany(filter: Partial<I>): Promise<string[]> {
-    const rows = await this.store.find(filter as I, { uuid: 1 }).exec();
+    const rows = await this.store.find(filter, { uuid: 1 }).exec();
 
     if (rows.length > 0) {
       return rows.map((row) => row.uuid as string);
@@ -252,7 +252,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
       .find(
         {
           uuid: { $in: uuids },
-        } as I,
+        },
         { uuid: 1 },
       )
       .exec();
@@ -268,7 +268,7 @@ export class BaseMemoryRepository<I, E extends Entity<I>>
     filter: Partial<I>,
     options: QueryParsedOptions,
   ): Promise<Pagination<E>> {
-    const total = await this.store.count(filter as I);
+    const total = await this.store.count(filter);
     const items = await this.store
       .find(filter as I)
       .skip(options.offset)
