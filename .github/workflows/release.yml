@@ -6,6 +6,35 @@ on:
       - qa
       - main
   workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Tipo de bump de version (manual override)'
+        type: choice
+        required: true
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+          - custom
+      custom_version:
+        description: 'Version personalizada (requerido solo si bump_type=custom)'
+        type: string
+        required: false
+        default: ''
+      target_branch:
+        description: 'Rama destino donde commitear el bump'
+        type: choice
+        required: true
+        default: 'qa'
+        options:
+          - qa
+          - main
+      create_tag:
+        description: 'Si true, crea el tag tras bumpear'
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   contents: write
@@ -20,6 +49,7 @@ env:
 jobs:
   resolve:
     name: resolve-stage
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       stage: ${{ steps.stage.outputs.stage }}
@@ -58,13 +88,13 @@ jobs:
             qa)
               STAGE="qa"
               BUMPED="true"
-              TAG="v${PKG_VERSION}rc"
+              TAG="${PKG_VERSION}-rc"
               RELEASE="false"
               ;;
             main)
               STAGE="main"
-              BUMPED="false"
-              TAG="v${PKG_VERSION}"
+              BUMPED="true"
+              TAG="${PKG_VERSION}"
               RELEASE="true"
               ;;
             *)
@@ -211,12 +241,215 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "v${NEW_VERSION}rc" || echo "tag already exists"
-          git push origin "v${NEW_VERSION}rc" || echo "tag already pushed"
+          git tag "${NEW_VERSION}-rc" || echo "tag already exists"
+          git push origin "${NEW_VERSION}-rc" || echo "tag already pushed"
+
+  bump-main:
+    name: bump-package-on-main
+    needs: [resolve, build]
+    if: needs.resolve.outputs.stage == 'main'
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+      bump_kind: ${{ steps.bump.outputs.kind }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Determine bump kind from commits
+        id: bump
+        shell: bash
+        env:
+          PKG_VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="HEAD~10..HEAD"
+          else
+            RANGE="${PREV_TAG}..HEAD"
+          fi
+          echo "Commit range for bump detection: ${RANGE}"
+          echo "range=${RANGE}" >> "$GITHUB_OUTPUT"
+
+          if git log "${RANGE}" --pretty=%B | grep -qE "^#major|BREAKING CHANGE"; then
+            KIND="major"
+          elif git log "${RANGE}" --pretty=%B | grep -qE "^feat:"; then
+            KIND="minor"
+          elif git log "${RANGE}" --pretty=%B | grep -qE "^fix:"; then
+            KIND="patch"
+          else
+            KIND="patch"
+          fi
+
+          MAJOR=$(echo "$PKG_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$PKG_VERSION" | cut -d. -f2)
+          PATCH=$(echo "$PKG_VERSION" | cut -d. -f3)
+
+          case "$KIND" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "kind=${KIND}"               >> "$GITHUB_OUTPUT"
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "bump kind: ${KIND}  ${PKG_VERSION} -> ${NEW_VERSION}"
+
+      - name: Update package.json version
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = './package.json';
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            pkg.version = process.env.NEW_VERSION;
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Commit version bump
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore(release): bump to v${NEW_VERSION} [skip ci]"
+          git push origin main
+
+  manual-bump:
+    name: manual-bump
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/node-setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Read current package.json version
+        id: pkg
+        shell: bash
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "value=${V}" >> "$GITHUB_OUTPUT"
+          echo "current version: ${V}"
+
+      - name: Resolve target bump
+        id: resolve
+        shell: bash
+        env:
+          CURRENT: ${{ steps.pkg.outputs.value }}
+          INPUT_BUMP_TYPE: ${{ inputs.bump_type }}
+          INPUT_CUSTOM: ${{ inputs.custom_version }}
+        run: |
+          set -euo pipefail
+          CURRENT="$CURRENT"
+          MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+          MINOR=$(echo "$CURRENT" | cut -d. -f2)
+          PATCH=$(echo "$CURRENT" | cut -d. -f3)
+
+          case "$INPUT_BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1)); PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+            custom)
+              if [ -z "$INPUT_CUSTOM" ]; then
+                echo "::error::custom_version is required when bump_type=custom"
+                exit 1
+              fi
+              NEW_VERSION="$INPUT_CUSTOM"
+              echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+              echo "bump: custom  ${CURRENT} -> ${NEW_VERSION}"
+              exit 0
+              ;;
+            *)
+              echo "::error::Unknown bump_type: $INPUT_BUMP_TYPE"
+              exit 1
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "bump: ${INPUT_BUMP_TYPE}  ${CURRENT} -> ${NEW_VERSION}"
+
+      - name: Update package.json version
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.resolve.outputs.new_version }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = './package.json';
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            pkg.version = process.env.NEW_VERSION;
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Commit and push version bump
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.resolve.outputs.new_version }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout "$TARGET_BRANCH" 2>/dev/null || git checkout -b "$TARGET_BRANCH" origin/"$TARGET_BRANCH"
+          git add package.json
+          git commit -m "chore(release): manual bump to ${NEW_VERSION} [skip ci]"
+          git push origin "$TARGET_BRANCH"
+
+      - name: Create tag
+        if: inputs.create_tag == 'true'
+        shell: bash
+        env:
+          NEW_VERSION: ${{ steps.resolve.outputs.new_version }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          TAG="${NEW_VERSION}$( [ "$TARGET_BRANCH" = "qa" ] && echo '-rc' || echo '' )"
+          git checkout "$TARGET_BRANCH" || true
+          git tag "$TAG" || echo "tag $TAG already exists"
+          git push origin "$TAG" || echo "tag already pushed"
+          echo "Created tag: $TAG"
+
+      - name: Create GitHub Release
+        if: inputs.target_branch == 'main' && inputs.create_tag == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.resolve.outputs.new_version }}
+          name: ${{ steps.resolve.outputs.new_version }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   main:
     name: tag-and-release-main
-    needs: [resolve, build]
+    needs: [resolve, build, bump-main]
     if: needs.resolve.outputs.stage == 'main'
     runs-on: ubuntu-latest
     steps:
@@ -224,22 +457,28 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read bumped package version
+        id: pkg
+        shell: bash
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "value=${V}" >> "$GITHUB_OUTPUT"
       - name: Create tag (main)
         shell: bash
         env:
-          TAG: ${{ needs.resolve.outputs.tag }}
+          NEW_VERSION: ${{ steps.pkg.outputs.value }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "$TAG" || echo "tag already exists"
-          git push origin "$TAG" || echo "tag already pushed"
+          git tag "${NEW_VERSION}" || echo "tag already exists"
+          git push origin "${NEW_VERSION}" || echo "tag already pushed"
 
       - name: Create GitHub Release
         if: needs.resolve.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.resolve.outputs.tag }}
-          name: ${{ needs.resolve.outputs.tag }}
+          tag_name: ${{ steps.pkg.outputs.value }}
+          name: ${{ steps.pkg.outputs.value }}
           generate_release_notes: true
           fail_on_unmatched_files: true
         env:

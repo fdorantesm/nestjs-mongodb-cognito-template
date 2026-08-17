@@ -35,10 +35,7 @@ export class RolePermissionsRepository extends BaseRepository<
     options.page = options.page ?? 1;
     options.limit = options.limit ?? 10;
 
-    const result = await this.rolePermissionModel.paginate(
-      filter as RolePermission,
-      options,
-    );
+    const result = await this.rolePermissionModel.paginate(filter, options);
 
     // Get all unique role and permission UUIDs
     const roleUuids = new Set<string>();

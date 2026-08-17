@@ -1,9 +1,9 @@
 name: tests
 
 on:
-  push:
-    branches: [main, 'feat/**', 'fix/**', 'chore/**']
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -16,6 +16,7 @@ env:
 jobs:
   lint:
     name: lint
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +28,7 @@ jobs:
 
   build:
     name: build
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +40,7 @@ jobs:
 
   unit-tests:
     name: unit-tests
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +52,7 @@ jobs:
 
   e2e-tests:
     name: e2e-tests
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,10 +70,17 @@ jobs:
     steps:
       - name: Verify aggregate status
         run: |
-          if [ "${{ needs.lint.result }}"        != "success" ] ||
-             [ "${{ needs.build.result }}"       != "success" ] ||
-             [ "${{ needs.unit-tests.result }}"  != "success" ] ||
-             [ "${{ needs.e2e-tests.result }}"   != "success" ]; then
+          STATUS_OK=true
+          for JOB in lint build unit-tests e2e-tests; do
+            RESULT="${{ needs[JOB].result }}"
+            if [ -z "$RESULT" ] || [ "$RESULT" != "success" ]; then
+              echo "$JOB: $RESULT (skipped or failed)"
+              STATUS_OK=false
+            else
+              echo "$JOB: $RESULT"
+            fi
+          done
+          if [ "$STATUS_OK" != "true" ]; then
             echo "one or more jobs failed"
             exit 1
           fi

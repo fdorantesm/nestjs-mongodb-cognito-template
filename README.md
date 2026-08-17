@@ -398,6 +398,76 @@ chore: update dependencies
 
 Present tense, max 50 chars for subject line.
 
+## Release Workflow
+
+Releases are fully automated via GitHub Actions on `.github/workflows/release.yml`. The flow has three stages and supports manual version overrides.
+
+### Stage branches and tag formats
+
+| Stage    | Trigger                                | Source branch     | Tag format           | Bumps `package.json` | Creates GitHub Release |
+|----------|----------------------------------------|-------------------|----------------------|-----------------------|-------------------------|
+| `dev`    | Manual `workflow_dispatch`             | current commit    | `<short-sha>`        | no                    | no                      |
+| `qa`     | Push to `qa`                           | `feat/*`, `dev`   | `0.0.1-rc`           | yes                   | no                      |
+| `main`   | Push to `main`                         | `qa`              | `0.0.1`              | yes                   | yes                     |
+
+### How version bumping works
+
+The version stored in `package.json` is the source of truth. On every push to `qa` or `main` the workflow:
+
+1. Detects the bump kind by inspecting commits since the last tag:
+   - `#major` keyword or a `BREAKING CHANGE:` footer -> **major**
+   - `feat:` prefix -> **minor**
+   - `fix:` prefix or any other type -> **patch**
+2. Increments `package.json` (e.g. `0.0.1` -> `0.0.2`).
+3. Commits the change with `chore(release): bump to 0.0.2 [skip ci]` directly to the target branch.
+4. Creates the corresponding git tag.
+
+`[skip ci]` prevents the bump commit from re-triggering the workflow.
+
+### Bump rules quick reference
+
+| Commit signal              | Bump    | Example                          |
+|----------------------------|---------|----------------------------------|
+| `#major` in body           | major   | `0.1.0` -> `1.0.0`               |
+| `BREAKING CHANGE:` footer  | major   | `0.1.0` -> `1.0.0`               |
+| `feat: ...`                | minor   | `0.0.5` -> `0.1.0`               |
+| `fix: ...` and others      | patch   | `0.0.5` -> `0.0.6`               |
+
+### Manual version override (`workflow_dispatch`)
+
+You can force a specific version without crafting a commit with `#major`. Open the Actions tab, select **Release**, then **Run workflow** and choose from:
+
+| Input            | Options                                | Default | Notes                                     |
+|------------------|----------------------------------------|---------|-------------------------------------------|
+| `bump_type`      | `patch`, `minor`, `major`, `custom`    | `patch` | Required                                  |
+| `custom_version` | free text                              | empty   | Required only when `bump_type=custom`     |
+| `target_branch`  | `qa`, `main`                           | `qa`    | Where to commit the bump                  |
+| `create_tag`     | true / false                           | true    | If true, creates the tag after bumping    |
+
+The job:
+
+1. Reads the current `package.json` version.
+2. Computes the next version from `bump_type` (or uses `custom_version` when set).
+3. Commits the bump to `target_branch` with `[skip ci]`.
+4. Optionally creates the git tag (`-rc` suffix on `qa`, no suffix on `main`).
+5. Optionally creates a GitHub Release when targeting `main`.
+
+### Common scenarios
+
+| Scenario                                            | Settings                                                |
+|-----------------------------------------------------|----------------------------------------------------------|
+| Hotfix patch in `qa`                                | `bump_type=patch`, `target_branch=qa`, `create_tag=true` |
+| Force full release in `main` (skip `qa`)            | `bump_type=patch`, `target_branch=main`, `create_tag=true` |
+| Pin a specific version (e.g. `1.0.0`)              | `bump_type=custom`, `custom_version=1.0.0`, `target_branch=main` |
+| Bump without tagging                                | `create_tag=false`                                       |
+
+### Required GitHub configuration (one-time)
+
+1. Settings -> Actions -> General -> **Workflow permissions**:
+   - Read and write permissions
+   - Allow GitHub Actions to create and approve pull requests
+2. (Optional) Branch protection on `main` requiring `release / resolve` status.
+
 ## License
 
 MIT

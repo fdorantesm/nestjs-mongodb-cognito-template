@@ -33,7 +33,7 @@ export class UserExtrasRepository extends BaseRepository<
     }
 
     return new UserExtraEntity(
-      document.toObject({ getters: true, virtuals: true }) as UserExtra,
+      document.toObject({ getters: true, virtuals: true }),
     );
   }
 
@@ -47,7 +47,7 @@ export class UserExtrasRepository extends BaseRepository<
     }
 
     return new UserExtraEntity(
-      document.toObject({ getters: true, virtuals: true }) as UserExtra,
+      document.toObject({ getters: true, virtuals: true }),
     );
   }
 
