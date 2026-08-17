@@ -1,12 +1,31 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventBus } from '@nestjs/cqrs';
+import { getModelToken } from '@nestjs/mongoose';
 
 import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/identity.service.interface';
 import { AuthE2eModule } from '#/auth-e2e.module';
 import { UsersMemoryRepository } from '@/modules/users/infrastructure/database/repositories/users.memory-repository';
 import { RolesMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/roles.memory-repository';
+import { PermissionsMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/permissions.memory-repository';
+import { RolePermissionsMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/role-permissions.memory-repository';
+import { ProfilesMemoryRepository } from '@/modules/users/infrastructure/database/repositories/profiles.memory-repository';
+import { UserExtrasMemoryRepository } from '@/modules/users/infrastructure/database/repositories/user-extras.memory-repository';
 import { post, get } from '#/helpers/request.helper';
+
+import { USERS_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/users.service.interface';
+import { PROFILES_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/profiles.service.interface';
+import { USER_EXTRAS_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/users-extra.service.interface';
+import { ROLES_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/roles.repository.interface';
+import { PERMISSIONS_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/permissions.repository.interface';
+import { ROLE_PERMISSIONS_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/role-permissions.repository.interface';
+
+import { RolePermissionDocument } from '@/modules/auth/infrastructure/database/models/role-permission.model';
+import { PermissionDocument } from '@/modules/auth/infrastructure/database/models/permission.model';
+import { RoleDocument } from '@/modules/auth/infrastructure/database/models/roles.model';
+import { UserDocument } from '@/modules/users/infrastructure/database/models/user.model';
+import { ProfileDocument } from '@/modules/users/infrastructure/database/models/profile.model';
+import { UserExtraDocument } from '@/modules/users/infrastructure/database/models/user-extra.model';
 
 describe('Auth Endpoints (e2e)', () => {
   let app: INestApplication;
@@ -84,21 +103,46 @@ describe('Auth Endpoints (e2e)', () => {
       ofType: jest.fn(),
     };
 
-    usersMemoryRepository = new UsersMemoryRepository();
-    rolesMemoryRepository = new RolesMemoryRepository();
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AuthE2eModule],
     })
+      .overrideProvider(getModelToken(RolePermissionDocument.name))
+      .useValue({})
+      .overrideProvider(getModelToken(PermissionDocument.name))
+      .useValue({})
+      .overrideProvider(getModelToken(RoleDocument.name))
+      .useValue({})
+      .overrideProvider(getModelToken(UserDocument.name))
+      .useValue({})
+      .overrideProvider(getModelToken(ProfileDocument.name))
+      .useValue({})
+      .overrideProvider(getModelToken(UserExtraDocument.name))
+      .useValue({})
       .overrideProvider(IDENTITY_SERVICE_TOKEN)
       .useValue(mockIdentityService)
       .overrideProvider(EventBus)
       .useValue(mockEventBus)
-      .overrideProvider('UsersRepository')
-      .useValue(usersMemoryRepository)
-      .overrideProvider('RolesRepository')
-      .useValue(rolesMemoryRepository)
+      .overrideProvider(USERS_REPOSITORY_TOKEN)
+      .useClass(UsersMemoryRepository)
+      .overrideProvider(ROLES_REPOSITORY_TOKEN)
+      .useClass(RolesMemoryRepository)
+      .overrideProvider(PERMISSIONS_REPOSITORY_TOKEN)
+      .useClass(PermissionsMemoryRepository)
+      .overrideProvider(ROLE_PERMISSIONS_REPOSITORY_TOKEN)
+      .useClass(RolePermissionsMemoryRepository)
+      .overrideProvider(PROFILES_REPOSITORY_TOKEN)
+      .useClass(ProfilesMemoryRepository)
+      .overrideProvider(USER_EXTRAS_REPOSITORY_TOKEN)
+      .useClass(UserExtrasMemoryRepository)
       .compile();
+
+    // Retrieve the DI-managed in-memory repositories for seeding.
+    usersMemoryRepository = moduleFixture.get<UsersMemoryRepository>(
+      USERS_REPOSITORY_TOKEN,
+    );
+    rolesMemoryRepository = moduleFixture.get<RolesMemoryRepository>(
+      ROLES_REPOSITORY_TOKEN,
+    );
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(

@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { getConnectionToken } from '@nestjs/mongoose';
 import { UuidModule } from 'nestjs-uuid';
 
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -9,26 +9,17 @@ import { IdentityModule } from '@/modules/identity/identity.module';
 import { UsersModule } from '@/modules/users/users.module';
 
 import { RequestContextService } from '@/core/infrastructure/services/request-context.service';
-
-import { UsersMemoryRepository } from '@/modules/users/infrastructure/database/repositories/users.memory-repository';
-import { ProfilesMemoryRepository } from '@/modules/users/infrastructure/database/repositories/profiles.memory-repository';
-import { UserExtrasMemoryRepository } from '@/modules/users/infrastructure/database/repositories/user-extras.memory-repository';
-import { RolesMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/roles.memory-repository';
-import { PermissionsMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/permissions.memory-repository';
-import { RolePermissionsMemoryRepository } from '@/modules/auth/infrastructure/database/repositories/role-permissions.memory-repository';
-
-import { USERS_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/users.service.interface';
-import { PROFILES_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/profiles.service.interface';
-import { USER_EXTRAS_REPOSITORY_TOKEN } from '@/modules/users/domain/interfaces/users-extra.service.interface';
-import { ROLES_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/roles.repository.interface';
-import { PERMISSIONS_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/permissions.repository.interface';
-import { ROLE_PERMISSIONS_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfaces/role-permissions.repository.interface';
+import { ContextMiddleware } from '@/core/infrastructure/middlewares/context.middleware';
+import { TransformInterceptor } from '@/core/infrastructure/interceptors/transform.interceptor';
 
 /**
  * Minimal in-memory test module for the auth e2e suite.
  *
- * Avoids loading MainModule (which boots Mongoose, real JWT, real Cognito)
- * and replaces every Mongo-bound repository with its in-memory equivalent.
+ * Avoids loading MainModule (which boots Mongoose, real JWT, real Cognito).
+ * Every Mongo-bound repository is replaced with its in-memory equivalent via
+ * `overrideProvider` in the spec (overrides must be applied at the testing
+ * module level, since providers declared here are shadowed by the ones the
+ * feature modules register under the same tokens).
  * No external services are required; everything is mocked.
  */
 @Module({
@@ -42,37 +33,18 @@ import { ROLE_PERMISSIONS_REPOSITORY_TOKEN } from '@/modules/auth/domain/interfa
   ],
   providers: [
     RequestContextService,
+    ContextMiddleware,
+    // Mirrors CoreModule so success responses keep the { requestId, data,
+    // statusCode, type } envelope the suite asserts on.
     {
-      provide: getConnectionToken(),
-      useValue: {
-        model: () => ({}),
-      },
-    },
-    {
-      provide: USERS_REPOSITORY_TOKEN,
-      useClass: UsersMemoryRepository
-    },
-    {
-      provide: PROFILES_REPOSITORY_TOKEN,
-      useClass: ProfilesMemoryRepository
-    },
-    {
-      provide: USER_EXTRAS_REPOSITORY_TOKEN,
-      useClass: UserExtrasMemoryRepository,
-    },
-    {
-      provide: ROLES_REPOSITORY_TOKEN,
-      useClass: RolesMemoryRepository
-    },
-    {
-      provide: PERMISSIONS_REPOSITORY_TOKEN,
-      useClass: PermissionsMemoryRepository,
-    },
-    {
-      provide: ROLE_PERMISSIONS_REPOSITORY_TOKEN,
-      useClass: RolePermissionsMemoryRepository,
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
     },
   ],
   exports: [AuthModule, UsersModule, IdentityModule],
 })
-export class AuthE2eModule {}
+export class AuthE2eModule implements NestModule {
+  public configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(ContextMiddleware).forRoutes('*');
+  }
+}
