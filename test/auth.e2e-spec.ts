@@ -115,6 +115,7 @@ describe('Auth Endpoints (e2e)', () => {
     // Create test role
     await rolesMemoryRepository.create({
       uuid: 'b7a5682d-8995-4259-aec5-2ec55eaf6d4c', // Valid UUID
+      code: 'user',
       name: 'Test Role',
       description: 'Test role for e2e tests',
       isActive: true,

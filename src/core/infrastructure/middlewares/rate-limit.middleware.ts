@@ -59,8 +59,7 @@ export class RateLimitMiddleware implements NestMiddleware {
     };
 
     const read = throttle.readInterval ?? throttle.interval ?? 30 * 60 * 1000;
-    const write =
-      throttle.writeInterval ?? throttle.interval ?? 30 * 60 * 1000;
+    const write = throttle.writeInterval ?? throttle.interval ?? 30 * 60 * 1000;
 
     this.readLimiter = expressRateLimit({
       ...rateLimitOptions,
