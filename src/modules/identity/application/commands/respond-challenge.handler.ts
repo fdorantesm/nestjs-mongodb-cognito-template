@@ -6,9 +6,7 @@ import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/ide
 import { RespondChallengeCommand } from '@/modules/identity/domain/commands/respond-challenge.command';
 
 @CommandHandler(RespondChallengeCommand)
-export class RespondChallengeHandler
-  implements ICommandHandler<RespondChallengeCommand>
-{
+export class RespondChallengeHandler implements ICommandHandler<RespondChallengeCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

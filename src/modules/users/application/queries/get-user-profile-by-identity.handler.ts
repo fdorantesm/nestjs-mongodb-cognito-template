@@ -8,9 +8,7 @@ import { GetUserProfileByIdentityQuery } from '@/modules/users/domain/queries/ge
 import type { UserProfileAggregate } from '@/modules/users/domain/interfaces/user.interface';
 
 @QueryHandler(GetUserProfileByIdentityQuery)
-export class GetUserProfileByIdentityHandler
-  implements IQueryHandler<GetUserProfileByIdentityQuery>
-{
+export class GetUserProfileByIdentityHandler implements IQueryHandler<GetUserProfileByIdentityQuery> {
   constructor(
     @InjectService(USERS_SERVICE_TOKEN)
     private readonly usersService: UsersService,

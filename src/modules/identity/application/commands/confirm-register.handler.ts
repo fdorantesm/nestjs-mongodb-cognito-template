@@ -6,9 +6,7 @@ import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/ide
 import { ConfirmRegisterCommand } from '@/modules/identity/domain/commands/confirm-register.command';
 
 @CommandHandler(ConfirmRegisterCommand)
-export class ConfirmRegisterHandler
-  implements ICommandHandler<ConfirmRegisterCommand>
-{
+export class ConfirmRegisterHandler implements ICommandHandler<ConfirmRegisterCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

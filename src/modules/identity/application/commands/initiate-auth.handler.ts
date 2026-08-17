@@ -6,9 +6,7 @@ import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/ide
 import { InitiateAuthCommand } from '@/modules/identity/domain/commands/initiate-auth.command';
 
 @CommandHandler(InitiateAuthCommand)
-export class InitiateAuthHandler
-  implements ICommandHandler<InitiateAuthCommand>
-{
+export class InitiateAuthHandler implements ICommandHandler<InitiateAuthCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

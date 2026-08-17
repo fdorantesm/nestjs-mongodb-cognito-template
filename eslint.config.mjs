@@ -7,7 +7,15 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      'eslint.config.mjs',
+      'test/setup-e2e.ts',
+      'test/auth-e2e.module.ts',
+      'test/jest-e2e.json',
+      'test/helpers/**',
+      '**/*.memory-repository.ts',
+      'docs/**',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -21,7 +29,7 @@ export default tseslint.config(
       ecmaVersion: 2021, // actualizado de 5 a 2021
       sourceType: 'module',
       parserOptions: {
-        projectService: true,
+        project: ['./tsconfig.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },

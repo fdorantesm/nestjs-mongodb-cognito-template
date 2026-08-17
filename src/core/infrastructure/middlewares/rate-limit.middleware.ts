@@ -35,9 +35,9 @@ export class RateLimitMiddleware implements NestMiddleware {
     const host = server?.host ?? 'localhost';
     const hasThrottleEnv = Boolean(
       process.env.ANTI_THROTTLE_MAX_REQUEST ||
-        process.env.ANTI_THROTTLE_READ_MAX_REQUEST ||
-        process.env.ANTI_THROTTLE_WRITE_MAX_REQUEST ||
-        process.env.RATE_MAX_REQUEST,
+      process.env.ANTI_THROTTLE_READ_MAX_REQUEST ||
+      process.env.ANTI_THROTTLE_WRITE_MAX_REQUEST ||
+      process.env.RATE_MAX_REQUEST,
     );
 
     if (host === 'localhost' && !hasThrottleEnv) {

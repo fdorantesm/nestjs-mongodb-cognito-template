@@ -6,9 +6,7 @@ import { GetUserExtrasByUserIdQuery } from '@/modules/users/domain/queries/get-u
 import type { UserExtrasService } from '@/modules/users/domain/interfaces/users-extra.service.interface';
 
 @QueryHandler(GetUserExtrasByUserIdQuery)
-export class GetUserExtrasByUserIdHandler
-  implements IQueryHandler<GetUserExtrasByUserIdQuery>
-{
+export class GetUserExtrasByUserIdHandler implements IQueryHandler<GetUserExtrasByUserIdQuery> {
   constructor(
     @InjectService('UserExtrasService')
     private readonly userExtrasService: UserExtrasService,

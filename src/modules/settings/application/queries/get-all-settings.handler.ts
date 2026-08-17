@@ -6,9 +6,7 @@ import type { SettingsService } from '../../domain/interfaces/settings.service.i
 import { SETTINGS_SERVICE_TOKEN } from '../../domain/interfaces/settings.service.interface';
 
 @QueryHandler(GetAllSettingsQuery)
-export class GetAllSettingsHandler
-  implements IQueryHandler<GetAllSettingsQuery>
-{
+export class GetAllSettingsHandler implements IQueryHandler<GetAllSettingsQuery> {
   constructor(
     @InjectService(SETTINGS_SERVICE_TOKEN)
     private readonly settingsService: SettingsService,

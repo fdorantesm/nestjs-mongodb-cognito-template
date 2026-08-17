@@ -8,9 +8,7 @@ import {
 } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @CommandHandler(DeleteIdentityUserCommand)
-export class DeleteIdentityUserHandler
-  implements ICommandHandler<DeleteIdentityUserCommand>
-{
+export class DeleteIdentityUserHandler implements ICommandHandler<DeleteIdentityUserCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

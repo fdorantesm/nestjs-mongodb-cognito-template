@@ -8,9 +8,7 @@ import type { RolePermissionsService } from '@/modules/auth/domain/interfaces/ro
 
 @CommandHandler(DeleteRolePermissionCommand)
 @Injectable()
-export class DeleteRolePermissionHandler
-  implements ICommandHandler<DeleteRolePermissionCommand>
-{
+export class DeleteRolePermissionHandler implements ICommandHandler<DeleteRolePermissionCommand> {
   constructor(
     @InjectService(ROLE_PERMISSIONS_SERVICE_TOKEN)
     private readonly rolePermissionsService: RolePermissionsService,

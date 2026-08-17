@@ -8,9 +8,7 @@ import {
 } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenHandler
-  implements ICommandHandler<RefreshTokenCommand>
-{
+export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

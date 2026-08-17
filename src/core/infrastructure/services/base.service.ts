@@ -9,9 +9,10 @@ import { Json } from '@/core/types/general/json.type';
 import { QueryParsedOptions } from '@/core/types/general/query-parsed-options.type';
 
 @Injectable()
-export class BaseService<I extends BaseProps, E extends Entity<I>>
-  implements Crud<I, E>
-{
+export class BaseService<
+  I extends BaseProps,
+  E extends Entity<I>,
+> implements Crud<I, E> {
   constructor(private readonly repository: Crud<I, E>) {}
 
   public findOne(

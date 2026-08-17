@@ -8,9 +8,7 @@ import {
 } from '@/modules/settings/domain/interfaces';
 
 @CommandHandler(DeleteSettingCommand)
-export class DeleteSettingHandler
-  implements ICommandHandler<DeleteSettingCommand>
-{
+export class DeleteSettingHandler implements ICommandHandler<DeleteSettingCommand> {
   constructor(
     @InjectService(SETTINGS_SERVICE_TOKEN)
     private readonly settingsService: SettingsService,

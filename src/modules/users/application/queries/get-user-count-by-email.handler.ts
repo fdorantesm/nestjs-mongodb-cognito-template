@@ -6,9 +6,7 @@ import type { UsersService } from '@/modules/users/domain/interfaces/users.servi
 import { USERS_SERVICE_TOKEN } from '@/modules/users/domain/interfaces/users.service.interface';
 
 @QueryHandler(GetUserCountByEmailQuery)
-export class GetUserCountByEmailHandler
-  implements IQueryHandler<GetUserCountByEmailQuery>
-{
+export class GetUserCountByEmailHandler implements IQueryHandler<GetUserCountByEmailQuery> {
   constructor(
     @InjectService(USERS_SERVICE_TOKEN)
     private readonly usersService: UsersService,

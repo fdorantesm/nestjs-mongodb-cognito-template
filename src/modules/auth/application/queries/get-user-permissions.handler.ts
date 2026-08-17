@@ -11,9 +11,7 @@ import { PERMISSIONS_SERVICE_TOKEN } from '@/modules/auth/domain/interfaces/perm
 import type { PermissionsService } from '@/modules/auth/domain/interfaces/permissions.service.interface';
 
 @QueryHandler(GetUserPermissionsQuery)
-export class GetUserPermissionsHandler
-  implements IQueryHandler<GetUserPermissionsQuery>
-{
+export class GetUserPermissionsHandler implements IQueryHandler<GetUserPermissionsQuery> {
   constructor(
     @InjectService(USERS_SERVICE_TOKEN)
     private readonly usersService: UsersService,

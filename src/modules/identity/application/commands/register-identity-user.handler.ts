@@ -6,9 +6,7 @@ import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/ide
 import { RegisterIdentityUserCommand } from '@/modules/identity/domain/commands/register-identity-user.command';
 
 @CommandHandler(RegisterIdentityUserCommand)
-export class RegisterIdentityUserHandler
-  implements ICommandHandler<RegisterIdentityUserCommand>
-{
+export class RegisterIdentityUserHandler implements ICommandHandler<RegisterIdentityUserCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

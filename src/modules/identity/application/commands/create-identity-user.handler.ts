@@ -8,9 +8,7 @@ import {
 } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @CommandHandler(CreateIdentityUserCommand)
-export class CreateIdentityUserHandler
-  implements ICommandHandler<CreateIdentityUserCommand>
-{
+export class CreateIdentityUserHandler implements ICommandHandler<CreateIdentityUserCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

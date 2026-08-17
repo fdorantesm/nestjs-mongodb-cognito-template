@@ -8,9 +8,7 @@ import {
 } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @QueryHandler(GetIdentityUserQuery)
-export class GetIdentityUserHandler
-  implements IQueryHandler<GetIdentityUserQuery>
-{
+export class GetIdentityUserHandler implements IQueryHandler<GetIdentityUserQuery> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

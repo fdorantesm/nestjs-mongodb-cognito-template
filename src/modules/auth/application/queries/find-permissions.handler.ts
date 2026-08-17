@@ -7,9 +7,7 @@ import { FindPermissionsQuery } from '@/modules/auth/domain/queries/find-permiss
 import type { PermissionEntity } from '@/modules/auth/domain/entities/permission.entity';
 
 @QueryHandler(FindPermissionsQuery)
-export class FindPermissionsHandler
-  implements IQueryHandler<FindPermissionsQuery>
-{
+export class FindPermissionsHandler implements IQueryHandler<FindPermissionsQuery> {
   constructor(
     @InjectService(PERMISSIONS_SERVICE_TOKEN)
     private readonly permissionsService: PermissionsService,

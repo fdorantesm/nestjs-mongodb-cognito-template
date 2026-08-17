@@ -8,9 +8,7 @@ import type { PermissionsService } from '@/modules/auth/domain/interfaces/permis
 
 @CommandHandler(UpdatePermissionCommand)
 @Injectable()
-export class UpdatePermissionHandler
-  implements ICommandHandler<UpdatePermissionCommand>
-{
+export class UpdatePermissionHandler implements ICommandHandler<UpdatePermissionCommand> {
   constructor(
     @InjectService(PERMISSIONS_SERVICE_TOKEN)
     private readonly permissionsService: PermissionsService,
