@@ -4,8 +4,10 @@ import type { Crud } from '@/core/domain/crud.interface';
 
 export const ROLE_PERMISSIONS_REPOSITORY_TOKEN = 'RolePermissionsRepository';
 
-export interface RolePermissionsRepository
-  extends Crud<RolePermission, RolePermissionEntity> {
+export interface RolePermissionsRepository extends Crud<
+  RolePermission,
+  RolePermissionEntity
+> {
   findByRoleId(roleId: string): Promise<RolePermissionEntity[]>;
   findByRoleIdAndPermissionId(
     roleId: string,

@@ -9,9 +9,7 @@ import type { RolePermissionsService } from '@/modules/auth/domain/interfaces/ro
 
 @CommandHandler(CreateRolePermissionCommand)
 @Injectable()
-export class CreateRolePermissionHandler
-  implements ICommandHandler<CreateRolePermissionCommand>
-{
+export class CreateRolePermissionHandler implements ICommandHandler<CreateRolePermissionCommand> {
   constructor(
     @InjectService(ROLE_PERMISSIONS_SERVICE_TOKEN)
     private readonly rolePermissionsService: RolePermissionsService,

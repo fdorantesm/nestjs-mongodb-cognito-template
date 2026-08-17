@@ -6,9 +6,7 @@ import type { IdentityService } from '@/modules/identity/domain/interfaces/ident
 import { IDENTITY_SERVICE_TOKEN } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @CommandHandler(AssociateSoftwareTokenCommand)
-export class AssociateSoftwareTokenHandler
-  implements ICommandHandler<AssociateSoftwareTokenCommand>
-{
+export class AssociateSoftwareTokenHandler implements ICommandHandler<AssociateSoftwareTokenCommand> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

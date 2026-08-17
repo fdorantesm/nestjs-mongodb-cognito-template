@@ -11,9 +11,7 @@ import type { RolesService } from '@/modules/auth/domain/interfaces/roles.servic
 import { CreateUserCommand } from '@/modules/users/domain/commands/create-user.command';
 
 @EventsHandler(UserRegisteredEvent)
-export class UserRegisteredEventHandler
-  implements IEventHandler<UserRegisteredEvent>
-{
+export class UserRegisteredEventHandler implements IEventHandler<UserRegisteredEvent> {
   constructor(
     private readonly uuidService: UuidService,
     @InjectService(ROLES_SERVICE_TOKEN)

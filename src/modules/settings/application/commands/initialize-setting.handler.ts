@@ -8,9 +8,7 @@ import { SettingEntity } from '@/modules/settings/domain/entities';
 import type { SettingsService } from '@/modules/settings/domain/interfaces/settings.service.interface';
 
 @CommandHandler(InitializeSettingCommand)
-export class InitializeSettingHandler
-  implements ICommandHandler<InitializeSettingCommand>
-{
+export class InitializeSettingHandler implements ICommandHandler<InitializeSettingCommand> {
   constructor(
     @InjectService(SETTINGS_SERVICE_TOKEN)
     private readonly settingsService: SettingsService,

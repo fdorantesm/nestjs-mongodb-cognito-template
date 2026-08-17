@@ -7,9 +7,7 @@ import { USERS_SERVICE_TOKEN } from '@/modules/users/domain/interfaces/users.ser
 import { UserEntity } from '@/modules/users/domain/entities/user.entity';
 
 @QueryHandler(GetUserByIdentityQuery)
-export class GetUserByIdentityHandler
-  implements IQueryHandler<GetUserByIdentityQuery>
-{
+export class GetUserByIdentityHandler implements IQueryHandler<GetUserByIdentityQuery> {
   constructor(
     @InjectService(USERS_SERVICE_TOKEN)
     private readonly usersService: UsersService,

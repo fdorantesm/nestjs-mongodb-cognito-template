@@ -6,9 +6,7 @@ import type { SettingsService } from '../../domain/interfaces/settings.service.i
 import { SETTINGS_SERVICE_TOKEN } from '../../domain/interfaces/settings.service.interface';
 
 @CommandHandler(UpdateSettingCommand)
-export class UpdateSettingHandler
-  implements ICommandHandler<UpdateSettingCommand>
-{
+export class UpdateSettingHandler implements ICommandHandler<UpdateSettingCommand> {
   constructor(
     @InjectService(SETTINGS_SERVICE_TOKEN)
     private readonly settingsService: SettingsService,

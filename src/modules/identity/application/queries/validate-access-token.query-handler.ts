@@ -8,9 +8,7 @@ import {
 } from '@/modules/identity/domain/interfaces/identity.service.interface';
 
 @QueryHandler(ValidateAccessTokenQuery)
-export class ValidateAccessTokenQueryHandler
-  implements IQueryHandler<ValidateAccessTokenQuery>
-{
+export class ValidateAccessTokenQueryHandler implements IQueryHandler<ValidateAccessTokenQuery> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,

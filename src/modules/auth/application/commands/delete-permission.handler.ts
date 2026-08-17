@@ -8,9 +8,7 @@ import type { PermissionsService } from '@/modules/auth/domain/interfaces/permis
 
 @CommandHandler(DeletePermissionCommand)
 @Injectable()
-export class DeletePermissionHandler
-  implements ICommandHandler<DeletePermissionCommand>
-{
+export class DeletePermissionHandler implements ICommandHandler<DeletePermissionCommand> {
   constructor(
     @InjectService(PERMISSIONS_SERVICE_TOKEN)
     private readonly permissionsService: PermissionsService,

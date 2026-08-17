@@ -7,9 +7,7 @@ import { FindRolePermissionsQuery } from '@/modules/auth/domain/queries/find-rol
 import type { RolePermissionEntity } from '@/modules/auth/domain/entities/role-permission.entity';
 
 @QueryHandler(FindRolePermissionsQuery)
-export class FindRolePermissionsHandler
-  implements IQueryHandler<FindRolePermissionsQuery>
-{
+export class FindRolePermissionsHandler implements IQueryHandler<FindRolePermissionsQuery> {
   constructor(
     @InjectService(ROLE_PERMISSIONS_SERVICE_TOKEN)
     private readonly rolePermissionsService: RolePermissionsService,

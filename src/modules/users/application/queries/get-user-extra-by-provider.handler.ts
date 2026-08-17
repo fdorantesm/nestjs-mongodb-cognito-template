@@ -7,9 +7,7 @@ import { USER_EXTRAS_SERVICE_TOKEN } from '@/modules/users/domain/interfaces/use
 import type { UserExtra } from '@/modules/users/domain/interfaces/user-extra.interface';
 
 @QueryHandler(GetUserExtraByProviderQuery)
-export class GetUserExtraByProviderHandler
-  implements IQueryHandler<GetUserExtraByProviderQuery>
-{
+export class GetUserExtraByProviderHandler implements IQueryHandler<GetUserExtraByProviderQuery> {
   constructor(
     @InjectService(USER_EXTRAS_SERVICE_TOKEN)
     private readonly userExtrasService: UserExtrasService,

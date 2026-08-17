@@ -8,9 +8,7 @@ import type { RolePermissionsService } from '@/modules/auth/domain/interfaces/ro
 
 @QueryHandler(ListRolePermissionsQuery)
 @Injectable()
-export class ListRolePermissionsHandler
-  implements IQueryHandler<ListRolePermissionsQuery>
-{
+export class ListRolePermissionsHandler implements IQueryHandler<ListRolePermissionsQuery> {
   constructor(
     @InjectService(ROLE_PERMISSIONS_SERVICE_TOKEN)
     private readonly rolePermissionsService: RolePermissionsService,

@@ -4,7 +4,9 @@ import type { Crud } from '@/core/domain/crud.interface';
 
 export const PERMISSIONS_REPOSITORY_TOKEN = 'PermissionsRepository';
 
-export interface PermissionsRepository
-  extends Crud<Permission, PermissionEntity> {
+export interface PermissionsRepository extends Crud<
+  Permission,
+  PermissionEntity
+> {
   findByCode(code: string): Promise<PermissionEntity | null>;
 }

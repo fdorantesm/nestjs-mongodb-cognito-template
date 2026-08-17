@@ -9,9 +9,7 @@ import {
 import type { IdentityUser } from '@/modules/identity/domain/types/identity-user.types';
 
 @QueryHandler(GetCognitoUserQuery)
-export class GetCognitoUserQueryHandler
-  implements IQueryHandler<GetCognitoUserQuery>
-{
+export class GetCognitoUserQueryHandler implements IQueryHandler<GetCognitoUserQuery> {
   constructor(
     @InjectService(IDENTITY_SERVICE_TOKEN)
     private readonly identityService: IdentityService,
