@@ -47,7 +47,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     delete userPayload.password;
 
     if (Object.keys(userPayload).length > 0) {
-      await this.usersService.update({ uuid: userId }, userPayload as any);
+      await this.usersService.update({ uuid: userId }, userPayload);
     }
 
     await this.syncIdentity(user.getIdentityId(), payload);

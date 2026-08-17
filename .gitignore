@@ -19,6 +19,10 @@ lerna-debug.log*
 /coverage
 /.nyc_output
 
+# Local test env (use .env.testing.example as template)
+/.env.testing
+/.env.test
+
 # IDEs and editors
 /.idea
 .project

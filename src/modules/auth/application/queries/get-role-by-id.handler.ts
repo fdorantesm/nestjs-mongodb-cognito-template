@@ -39,7 +39,7 @@ export class GetRoleByIdHandler implements IQueryHandler<GetRoleByIdQuery> {
     const permissionIds = rolePermissions.map((rp) => rp.getPermissionId());
     const permissions = await this.queryBus.execute<PermissionEntity[]>(
       new FindPermissionsQuery({
-        uuid: { $in: permissionIds } as any,
+        uuid: { $in: permissionIds },
       }),
     );
 

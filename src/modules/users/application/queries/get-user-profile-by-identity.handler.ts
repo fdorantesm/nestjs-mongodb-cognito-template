@@ -36,6 +36,6 @@ export class GetUserProfileByIdentityHandler
     return {
       ...user.toJson(),
       profile: profile?.toJson(),
-    } as UserProfileAggregate;
+    };
   }
 }
